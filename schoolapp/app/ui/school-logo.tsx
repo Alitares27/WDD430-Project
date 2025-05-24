@@ -6,8 +6,8 @@ export default function schoolLogo() {
     <div
       className={`${roboto.className} flex flex-row items-center leading-none text-white`}
     >
-      <AcademicCapIcon  className="h-10 w-10 rotate-[15deg]" />
-      <p className="text-[40px]">ShoolApp</p>
+      <AcademicCapIcon  className="h-12 w-12 rotate-[15deg]" />
+      <p className="text-[35px]">ShoolApp</p>
     </div>
   );
 }
