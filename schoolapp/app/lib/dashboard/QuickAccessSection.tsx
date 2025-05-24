@@ -1,7 +1,7 @@
 
 import React from 'react';
 import QuickAccessItem from './QuickAccessItem';
-import { UserPlusIcon, UserGroupIcon, DocumentDuplicateIcon, CalendarDaysIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { UserPlusIcon, UserGroupIcon, DocumentDuplicateIcon, CalendarDaysIcon, ChartBarIcon, BookmarkSquareIcon  } from '@heroicons/react/24/outline';
 
 
 const QuickAccessSection: React.FC = () => {
@@ -10,6 +10,7 @@ const QuickAccessSection: React.FC = () => {
     { icon: UserGroupIcon, label: 'Add Teacher', href: '/dashboard/Teachers/Create' },
     { icon: DocumentDuplicateIcon, label: 'View Grades', href: '/dashboard/Grades' },
     { icon: CalendarDaysIcon, label: 'Attendance', href: '/dashboard/Attendance' },
+    { icon: BookmarkSquareIcon, label: 'Add Course', href: '/dashboard/Courses/' },
   ];
 
   return (
