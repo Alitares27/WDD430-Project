@@ -1,0 +1,188 @@
+'use client'; 
+
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation'; 
+import Button from '@/app/ui/button'; 
+import Image from 'next/image'; 
+
+interface Student {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  grade: string;
+  dateOfBirth: string;
+  address: string;
+  phoneNumber: string;
+  avatarUrl?: string;
+  enrollmentDate?: string;
+  parentsContact?: string;
+  notes?: string;
+}
+
+const DUMMY_STUDENTS_DETAIL: Student[] = [
+  {
+    id: 's001',
+    firstName: 'Juan',
+    lastName: 'Pérez',
+    email: 'juan.perez@example.com',
+    grade: '10th Grade',
+    dateOfBirth: '2008-03-15',
+    address: '123 Main St, Springfield, USA',
+    phoneNumber: '+1 (555) 123-4567',
+    enrollmentDate: '2022-09-01',
+    parentsContact: 'Maria Pérez: +1 (555) 987-6543',
+    notes: 'Excellent student, strong in mathematics.',
+  },
+  {
+    id: 's002',
+    firstName: 'Ana',
+    lastName: 'Gómez',
+    email: 'ana.gomez@example.com',
+    grade: '9th Grade',
+    dateOfBirth: '2009-07-22',
+    address: '456 Oak Ave, Shelbyville, USA',
+    phoneNumber: '+1 (555) 234-5678',
+    enrollmentDate: '2023-09-01',
+    parentsContact: 'Carlos Gómez: +1 (555) 876-5432',
+    notes: 'Actively participates in school clubs.',
+  },
+  {
+    id: 's003',
+    firstName: 'Carlos',
+    lastName: 'Díaz',
+    email: 'carlos.diaz@example.com',
+    grade: '10th Grade',
+    dateOfBirth: '2008-11-01',
+    address: '789 Pine Ln, Capital City, USA',
+    phoneNumber: '+1 (555) 345-6789',
+    enrollmentDate: '2022-09-01',
+    parentsContact: 'Luisa Díaz: +1 (555) 765-4321',
+    notes: 'Needs to improve attendance.',
+  },
+];
+
+export default function StudentDetailPage() {
+  const router = useRouter(); 
+  const params = useParams(); 
+  const studentId = params.id as string; 
+  const [student, setStudent] = useState<Student | null>(null); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null); 
+
+  useEffect(() => {
+    
+    const fetchStudentDetails = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const foundStudent = DUMMY_STUDENTS_DETAIL.find(s => s.id === studentId);
+        if (foundStudent) {
+          setStudent(foundStudent);
+        } else {
+          setError('Student not found.'); 
+        }
+      } catch (err) {
+        console.error("Error fetching student details:", err);
+        setError('Error loading student details. Please try again.');
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    if (studentId) {
+      fetchStudentDetails(); 
+    }
+  }, [studentId]); 
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-4 text-center text-gray-600">
+        <h1 className="text-3xl font-bold mb-4">Student Details</h1>
+        <p>Loading student details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4 text-center text-red-600">
+        <h1 className="text-3xl font-bold mb-4">Error</h1>
+        <p>{error}</p>
+        <Button onClick={() => router.back()} className="mt-4">Go Back</Button>
+      </div>
+    );
+  }
+
+  if (!student) {
+    return (
+      <div className="container mx-auto p-4 text-center text-gray-600">
+        <h1 className="text-3xl font-bold mb-4">Student Details</h1>
+        <p>No student data available.</p>
+        <Button onClick={() => router.back()} className="mt-4">Go Back</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-4 max-w-4xl">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Student Details</h1>
+
+      <div className="bg-white rounded-lg shadow-md p-8 mb-6">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+          {}
+          <div className="flex-shrink-0 w-32 h-32 rounded-full overflow-hidden border-4 border-blue-500 shadow-md">
+            {student.avatarUrl ? (
+              <Image
+                src={student.avatarUrl}
+                alt={`Avatar of ${student.firstName} ${student.lastName}`}
+                width={128}
+                height={128}
+                objectFit="cover"
+                className="w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 text-6xl font-bold">
+                {student.firstName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+
+          {}
+          <div className="flex-grow text-center md:text-left">
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">{student.firstName} {student.lastName}</h2>
+            <p className="text-xl text-blue-600 mb-4">{student.grade}</p>
+            <p className="text-gray-700 mb-1"><strong>Email:</strong> {student.email}</p>
+            <p className="text-gray-700 mb-1"><strong>Phone:</strong> {student.phoneNumber}</p>
+            <p className="text-gray-700 mb-1"><strong>Date of Birth:</strong> {student.dateOfBirth}</p>
+            <p className="text-gray-700 mb-1"><strong>Address:</strong> {student.address}</p>
+            {student.enrollmentDate && <p className="text-gray-700 mb-1"><strong>Enrollment Date:</strong> {student.enrollmentDate}</p>}
+            {student.parentsContact && <p className="text-gray-700 mb-1"><strong>Parents Contact:</strong> {student.parentsContact}</p>}
+          </div>
+        </div>
+
+        {}
+        {student.notes && (
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">Notes</h3>
+            <p className="text-gray-700 leading-relaxed">{student.notes}</p>
+          </div>
+        )}
+      </div>
+
+      {}
+      <div className="flex justify-between md:justify-end gap-4 mt-6">
+        <Button variant="secondary" onClick={() => router.back()}>
+          Go Back
+        </Button>
+        <Button variant="primary" onClick={() => router.push(`/dashboard/Students/${student.id}/edit`)}>
+          Edit 
+        </Button>
+        <Button variant="danger" onClick={() => alert('Delete logic for student: ' + student.id)}>
+          Delete 
+        </Button>
+      </div>
+    </div>
+  );
+}

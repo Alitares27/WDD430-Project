@@ -25,7 +25,7 @@ const announcements = [
 
   return (
     <section>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Announcements</h2>
+      <h2 className="text-2xl font-bold text-cyan-900 mb-6">Announcements</h2>
       <div className="space-y-4"> 
         {announcements.map((announcement) => (
           <AnnouncementCard

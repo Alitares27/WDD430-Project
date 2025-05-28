@@ -12,14 +12,14 @@ interface AnnouncementCardProps {
 const AnnouncementCard: React.FC<AnnouncementCardProps> = ({ title, date, imageUrl, content }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 flex flex-col md:flex-row gap-4">
-      {/* Sección de la Imagen (Placeholder) */}
+      {}
       <div className="flex-shrink-0 w-full md:w-48 h-32 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">
         {imageUrl ? (
           <Image
             src={imageUrl}
             alt={`Imagen de ${title}`}
-            width={192} // 48 * 4 (Tailwind w-48)
-            height={128} // 32 * 4 (Tailwind h-32)
+            width={192} 
+            height={128} 
             objectFit="cover"
             className="w-full h-full"
           />
@@ -30,11 +30,11 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({ title, date, imageU
         )}
       </div>
 
-      {/* Contenido del Anuncio */}
+      {/* Content Section */}
       <div className="flex-1">
-        <h3 className="text-xl font-semibold text-gray-800 mb-1">{title}</h3>
-        <p className="text-sm text-gray-500 mb-2">{date}</p>
-        <p className="text-gray-700 text-sm leading-relaxed line-clamp-4"> 
+        <h3 className="text-xl font-bold text-cyan-900 mb-1">{title}</h3>
+        <p className="text-sm text-black-700 mb-2">{date}</p>
+        <p className="text-black-700 text-sm leading-relaxed line-clamp-4"> 
           {content}
         </p>
       </div>
