@@ -1,7 +1,7 @@
 
 import React from 'react';
 import QuickAccessItem from './QuickAccessItem';
-import { UserPlusIcon, UserGroupIcon, DocumentDuplicateIcon, CalendarDaysIcon, ChartBarIcon, BookmarkSquareIcon  } from '@heroicons/react/24/outline';
+import { UserPlusIcon, UserGroupIcon, DocumentDuplicateIcon, CalendarDaysIcon, BookmarkSquareIcon  } from '@heroicons/react/24/outline';
 
 
 const QuickAccessSection: React.FC = () => {

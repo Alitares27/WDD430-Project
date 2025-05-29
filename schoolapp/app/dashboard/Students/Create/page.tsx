@@ -50,6 +50,7 @@ export default function AddStudentPage() {
         phoneNumber,
         
       };
+      console.log(newStudentData);
 
       alert('Student added successfully (simulated)!');
       router.push('/dashboard/Students'); 

@@ -50,7 +50,7 @@ export default function AddNewTeacherPage() {
         qualification,
         bio,
       };
-      
+      console.log(newTeacherData);
       alert('Teacher added successfully (simulated)!');
       router.push('/dashboard/Teachers'); 
     }
