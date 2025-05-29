@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import postgres from 'postgres';
-import { Student } from './definitions';
+
+
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -65,7 +66,6 @@ export async function createStudent(prevState: StudentState, formData: FormData)
         avatarurl: formData.get('avatarurl') || null,
     });
 
-    // If validation fails, return errors
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
@@ -87,7 +87,6 @@ export async function createStudent(prevState: StudentState, formData: FormData)
         avatarurl,
     } = validatedFields.data;
 
-    // Ensure no undefined values are passed to SQL (convert undefined to null)
     const safefirstname = firstname ?? null;
     const safelastname = lastname ?? null;
     const safeEmail = email ?? null;
@@ -108,18 +107,17 @@ export async function createStudent(prevState: StudentState, formData: FormData)
                 ${safefirstname}, ${safelastname}, ${safeEmail}, ${safeGrade}, ${safedateofbirth}, ${safeAddress}, ${safephonenumber}, ${safeenrollmentdate}, ${safeparentscontact}, ${safeNotes}, ${safeAvatarurl}
             )
         `;
-    } catch (error) {
+   
+    } catch {
         return {
             message: 'Database error: Could not create student.',
         };
     }
-
     revalidatePath('/dashboard/Students');
     redirect('/dashboard/Students');
 }
 
 const CreateTeacher = StudentFormSchema.omit({ id: true });
-
 export type TeacherState = {
     errors?: {
         firstname?: string[];
@@ -211,13 +209,11 @@ export async function createTeacher(prevState: TeacherState, formData: FormData)
                 ${safefirstname}, ${safelastname}, ${safeemail}, ${safesubject}, ${safephonenumber}, ${safeaddress}, ${safehiredate}, ${safequalification}, ${safebio}, ${safeavatarurl}
             )
         `;
-    } catch (error) {
+    } catch {
         return {
             message: 'Database error: Could not create teacher.',
         };
     }
-
-    revalidatePath('/dashboard/Teachers');
     redirect('/dashboard/Teachers');
 }
 
@@ -288,13 +284,12 @@ export async function updateStudent(prevState: StudentState, formData: FormData)
                 avatarurl = ${safeAvatarurl}
             WHERE id = ${safeId}
         `;
-    } catch (error) {
+
+    } catch {
         return {
             message: 'Database error: Could not update student.',
         };
     }
-
-    revalidatePath('/dashboard/Students');
     redirect('/dashboard/Students');
 }
 
@@ -370,20 +365,19 @@ export async function updateTeacher(prevState: TeacherState, formData: FormData)
                 avatarurl = ${avatarurl ?? null}
             WHERE id = ${id}
         `;
-    } catch (error) {
+
+    } catch {
         return {
             message: 'Database error: Could not update teacher.',
         };
     }
-
-    revalidatePath('/dashboard/Teachers');
     redirect('/dashboard/Teachers');
 }
 
 export async function deleteStudent(id: string) {
     try {
         await sql`DELETE FROM students WHERE id = ${id}`;
-    } catch (error) {
+    } catch {
         return {
             message: 'Database error: Could not delete student.',
         };
@@ -394,7 +388,7 @@ export async function deleteStudent(id: string) {
 export async function deleteTeacher(id: string) {
     try {
         await sql`DELETE FROM teachers WHERE id = ${id}`;
-    } catch (error) {
+    } catch {
         return {
             message: 'Database error: Could not delete teacher.',
         };

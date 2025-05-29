@@ -59,8 +59,12 @@ export default function EditTeacherPage() {
         setQualification(data.qualification || '');
         setBio(data.bio || '');
         setAvatarurl(data.avatarurl || '');
-      } catch (err: any) {
-        setFetchError(err.message || 'Error loading teacher data for editing.');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setFetchError(err.message);
+        } else {
+          setFetchError('Error loading teacher data for editing.');
+        }
       } finally {
         setLoading(false);
       }
@@ -110,12 +114,17 @@ export default function EditTeacherPage() {
           body: JSON.stringify(updatedTeacherData),
         });
         if (!res.ok) {
-          throw new Error('Failed to update teacher.');
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Error updating teacher.');
         }
-        alert('Teacher updated successfully!');
+        
         router.push(`/dashboard/Teachers/${teacherId}`);
-      } catch (err: any) {
-        setFetchError(err.message || 'Error updating teacher.');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setFetchError(err.message);
+        } else {
+          setFetchError('Error updating teacher.');
+        }
       } finally {
         setLoading(false);
       }

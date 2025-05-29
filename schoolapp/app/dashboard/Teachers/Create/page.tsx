@@ -60,7 +60,7 @@ export default function AddNewTeacherPage() {
         if (!res.ok) throw new Error('Failed to add teacher');
         alert('Teacher added successfully!');
         router.push('/dashboard/Teachers');
-      } catch (err) {
+      } catch {
         alert('Error adding teacher. Please try again.');
       } finally {
         setLoading(false);

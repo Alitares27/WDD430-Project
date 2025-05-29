@@ -40,8 +40,12 @@ export default function TeacherDetailPage() {
         }
         const data = await res.json();
         setTeacher(data);
-      } catch (err: any) {
-        setError(err.message || 'Error loading teacher details. Please try again.');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Error loading teacher details. Please try again.');
+        }
       } finally {
         setLoading(false);
       }

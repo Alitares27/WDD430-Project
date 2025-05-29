@@ -11,20 +11,15 @@ export default function TeachersPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchTeachers = async () => {
-      setLoading(true);
       try {
         const res = await fetch('/api/teachers');
         if (!res.ok) throw new Error('Failed to fetch teachers');
         const data = await res.json();
         setTeachers(data);
-      } catch (err) {
+      } catch {
         setTeachers([]);
-      } finally {
-        setLoading(false);
       }
     };
     fetchTeachers();
