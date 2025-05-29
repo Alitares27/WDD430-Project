@@ -4,97 +4,53 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation'; 
 import Button from '@/app/ui/button'; 
 import Image from 'next/image'; 
-
 interface Student {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   grade: string;
-  dateOfBirth: string;
-  address: string;
-  phoneNumber: string;
-  avatarUrl?: string;
-  enrollmentDate?: string;
-  parentsContact?: string;
-  notes?: string;
+  dateOfBirth?: string | null;
+  address?: string | null;
+  phoneNumber?: string | null;
+  avatarUrl?: string | null;
+  enrollmentDate?: string | null;
+  parentsContact?: string | null;
+  notes?: string | null;
 }
 
-const DUMMY_STUDENTS_DETAIL: Student[] = [
-  {
-    id: 's001',
-    firstName: 'Juan',
-    lastName: 'Pérez',
-    email: 'juan.perez@example.com',
-    grade: '10th Grade',
-    dateOfBirth: '2008-03-15',
-    address: '123 Main St, Springfield, USA',
-    phoneNumber: '+1 (555) 123-4567',
-    enrollmentDate: '2022-09-01',
-    parentsContact: 'Maria Pérez: +1 (555) 987-6543',
-    notes: 'Excellent student, strong in mathematics.',
-  },
-  {
-    id: 's002',
-    firstName: 'Ana',
-    lastName: 'Gómez',
-    email: 'ana.gomez@example.com',
-    grade: '9th Grade',
-    dateOfBirth: '2009-07-22',
-    address: '456 Oak Ave, Shelbyville, USA',
-    phoneNumber: '+1 (555) 234-5678',
-    enrollmentDate: '2023-09-01',
-    parentsContact: 'Carlos Gómez: +1 (555) 876-5432',
-    notes: 'Actively participates in school clubs.',
-  },
-  {
-    id: 's003',
-    firstName: 'Carlos',
-    lastName: 'Díaz',
-    email: 'carlos.diaz@example.com',
-    grade: '10th Grade',
-    dateOfBirth: '2008-11-01',
-    address: '789 Pine Ln, Capital City, USA',
-    phoneNumber: '+1 (555) 345-6789',
-    enrollmentDate: '2022-09-01',
-    parentsContact: 'Luisa Díaz: +1 (555) 765-4321',
-    notes: 'Needs to improve attendance.',
-  },
-];
-
 export default function StudentDetailPage() {
-  const router = useRouter(); 
-  const params = useParams(); 
-  const studentId = params.id as string; 
-  const [student, setStudent] = useState<Student | null>(null); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState<string | null>(null); 
+  const router = useRouter();
+  const params = useParams();
+  const studentId = params.id as string;
+  const [student, setStudent] = useState<Student | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    
     const fetchStudentDetails = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const foundStudent = DUMMY_STUDENTS_DETAIL.find(s => s.id === studentId);
-        if (foundStudent) {
-          setStudent(foundStudent);
-        } else {
-          setError('Student not found.'); 
+        const res = await fetch(`/api/students/${studentId}`);
+        if (!res.ok) {
+          throw new Error('Student not found.');
         }
+        const data = await res.json();
+        setStudent(data);
       } catch (err) {
         console.error("Error fetching student details:", err);
         setError('Error loading student details. Please try again.');
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     if (studentId) {
-      fetchStudentDetails(); 
+      fetchStudentDetails();
     }
-  }, [studentId]); 
+  }, [studentId]);
 
   if (loading) {
     return (

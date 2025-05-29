@@ -5,50 +5,54 @@ import Input from '@/app/ui/Input';
 import Button from '@/app/ui/button'; 
 import TeacherCard from '@/app/ui/teachers/TeacherCard'; 
 import { useRouter } from 'next/navigation'; 
-import { Teachers as DUMMY_TEACHERS } from '../../lib/placeholder-data';
-
-
-interface Teacher {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  subject: string;
-  avatarUrl?: string;
-}
+import { Teacher } from '@/app/lib/definitions';
 
 export default function TeachersPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [teachers, setTeachers] = useState<Teacher[]>(DUMMY_TEACHERS);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  
   useEffect(() => {
-
+    const fetchTeachers = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/teachers');
+        if (!res.ok) throw new Error('Failed to fetch teachers');
+        const data = await res.json();
+        setTeachers(data);
+      } catch (err) {
+        setTeachers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTeachers();
   }, []);
 
-  
   const filteredTeachers = teachers.filter(teacher =>
-    teacher.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    teacher.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    teacher.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    teacher.lastname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     teacher.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
     teacher.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleViewDetails = (id: string) => {
     router.push(`/dashboard/Teachers/${id}`);
-    console.log(`Navigating to teacher details with ID: ${id}`);
   };
 
   const handleEdit = (id: string) => {
-    alert(`Logic to edit teacher with ID: ${id}`);
     router.push(`/dashboard/Teachers/${id}/edit`);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm(`Are you sure you want to delete the teacher with ID: ${id}? This action is irreversible.`)) {
-      setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.id !== id));
-      alert(`Teacher with ID: ${id} deleted.`);
+      try {
+        await fetch(`/api/teachers/${id}`, { method: 'DELETE' });
+        setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.id !== id));
+      } catch {
+        alert('Failed to delete teacher.');
+      }
     }
   };
 
@@ -81,7 +85,14 @@ export default function TeachersPage() {
           filteredTeachers.map(teacher => (
             <TeacherCard
               key={teacher.id}
-              teacher={teacher}
+              teacher={{
+                ...teacher,
+                firstName: teacher.firstname,
+                lastName: teacher.lastname,
+                phoneNumber: teacher.phonenumber,
+                hireDate: teacher.hiredate,
+                avatarUrl: teacher.avatarurl,
+              }}
               onViewDetails={handleViewDetails}
               onEdit={handleEdit}
               onDelete={handleDelete}

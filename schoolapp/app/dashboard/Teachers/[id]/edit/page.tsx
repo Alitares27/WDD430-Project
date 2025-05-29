@@ -7,73 +7,33 @@ import { useParams, useRouter } from 'next/navigation';
 
 interface Teacher {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   email: string;
   subject: string;
-  phoneNumber: string;
-  address?: string;
-  hireDate?: string;
-  qualification?: string;
-  bio?: string;
-  avatarUrl?: string;
+  phonenumber?: string | null;
+  address?: string | null;
+  hiredate?: string | null;
+  qualification?: string | null;
+  bio?: string | null;
+  avatarurl?: string | null;
 }
-
-const DUMMY_TEACHERS_DATA: Teacher[] = [
-  {
-    id: 't001',
-    firstName: 'Alice',
-    lastName: 'Smith',
-    email: 'alice.smith@example.com',
-    subject: 'Mathematics',
-    phoneNumber: '+1 (555) 111-2222',
-    address: '123 Math Lane, Educaville, USA',
-    hireDate: '2018-08-15',
-    qualification: 'Ph.D. in Mathematics',
-    bio: 'Experienced math teacher with a passion for problem-solving. Enjoys integrating real-world applications into lessons.',
-    avatarUrl: 'https://via.placeholder.com/200/007BFF/FFFFFF?text=AS',
-  },
-  {
-    id: 't002',
-    firstName: 'Bob',
-    lastName: 'Johnson',
-    email: 'bob.johnson@example.com',
-    subject: 'Physics',
-    phoneNumber: '+1 (555) 333-4444',
-    address: '456 Quantum Blvd, Science City, USA',
-    hireDate: '2020-09-01',
-    qualification: 'M.Sc. in Physics Education',
-    bio: 'Dedicated physics educator who believes in hands-on learning. Leads the school robotics club.',
-  },
-  {
-    id: 't003',
-    firstName: 'Carol',
-    lastName: 'Williams',
-    email: 'carol.w@example.com',
-    subject: 'Literature',
-    phoneNumber: '+1 (555) 555-6666',
-    address: '789 Storybook Rd, Booktown, USA',
-    hireDate: '2019-01-20',
-    qualification: 'B.A. in English Literature',
-    bio: 'Passionate about classic literature and creative writing. Organizes the school\'s annual poetry slam.',
-    avatarUrl: 'https://via.placeholder.com/200/FFC107/000000?text=CW',
-  },
-];
 
 export default function EditTeacherPage() {
   const router = useRouter();
   const params = useParams();
-  const teacherId = params.id as string; 
+  const teacherId = params.id as string;
 
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
+  const [firstname, setFirstname] = useState<string>('');
+  const [lastname, setLastname] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [phonenumber, setPhonenumber] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [hireDate, setHireDate] = useState<string>('');
+  const [hiredate, setHiredate] = useState<string>('');
   const [qualification, setQualification] = useState<string>('');
   const [bio, setBio] = useState<string>('');
+  const [avatarurl, setAvatarurl] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -84,25 +44,23 @@ export default function EditTeacherPage() {
       setLoading(true);
       setFetchError(null);
       try {
-
-        const data = DUMMY_TEACHERS_DATA.find(t => t.id === teacherId);
-
-        if (data) {
-          setFirstName(data.firstName || '');
-          setLastName(data.lastName || '');
-          setEmail(data.email || '');
-          setSubject(data.subject || '');
-          setPhoneNumber(data.phoneNumber || '');
-          setAddress(data.address || '');
-          setHireDate(data.hireDate || '');
-          setQualification(data.qualification || '');
-          setBio(data.bio || '');
-        } else {
-          setFetchError('Teacher not found.');
+        const res = await fetch(`/api/teachers/${teacherId}`);
+        if (!res.ok) {
+          throw new Error('Teacher not found.');
         }
-      } catch (err) {
-        console.error("Error fetching teacher data:", err);
-        setFetchError('Error loading teacher data for editing.');
+        const data: Teacher = await res.json();
+        setFirstname(data.firstname || '');
+        setLastname(data.lastname || '');
+        setEmail(data.email || '');
+        setSubject(data.subject || '');
+        setPhonenumber(data.phonenumber || '');
+        setAddress(data.address || '');
+        setHiredate(data.hiredate || '');
+        setQualification(data.qualification || '');
+        setBio(data.bio || '');
+        setAvatarurl(data.avatarurl || '');
+      } catch (err: any) {
+        setFetchError(err.message || 'Error loading teacher data for editing.');
       } finally {
         setLoading(false);
       }
@@ -111,44 +69,56 @@ export default function EditTeacherPage() {
     if (teacherId) {
       fetchTeacherData();
     }
-  }, [teacherId]); 
+  }, [teacherId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newFormErrors: { [key: string]: string } = {};
 
-    if (!firstName.trim()) newFormErrors.firstName = 'First Name is required.';
-    if (!lastName.trim()) newFormErrors.lastName = 'Last Name is required.';
+    if (!firstname.trim()) newFormErrors.firstname = 'First Name is required.';
+    if (!lastname.trim()) newFormErrors.lastname = 'Last Name is required.';
     if (!email.trim()) {
       newFormErrors.email = 'Email is required.';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newFormErrors.email = 'Email address is invalid.';
     }
     if (!subject.trim()) newFormErrors.subject = 'Subject is required.';
-    if (!phoneNumber.trim()) newFormErrors.phoneNumber = 'Phone Number is required.';
+    if (!phonenumber.trim()) newFormErrors.phonenumber = 'Phone Number is required.';
 
     setFormErrors(newFormErrors);
 
     if (Object.keys(newFormErrors).length === 0) {
-      const updatedTeacherData: Partial<Teacher> = { 
-        id: teacherId, 
-        firstName,
-        lastName,
+      const updatedTeacherData: Partial<Teacher> = {
+        firstname,
+        lastname,
         email,
         subject,
-        phoneNumber,
+        phonenumber,
         address,
-        hireDate,
+        hiredate,
         qualification,
         bio,
+        avatarurl,
       };
 
-      console.log('Updating teacher data:', updatedTeacherData);
-
-      
-      alert('Teacher updated successfully (simulated)!');
-      router.push(`/dashboard/Teachers/${teacherId}`); 
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/teachers/${teacherId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedTeacherData),
+        });
+        if (!res.ok) {
+          throw new Error('Failed to update teacher.');
+        }
+        alert('Teacher updated successfully!');
+        router.push(`/dashboard/Teachers/${teacherId}`);
+      } catch (err: any) {
+        setFetchError(err.message || 'Error updating teacher.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -178,23 +148,23 @@ export default function EditTeacherPage() {
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="firstName"
+            id="firstname"
             label="First Name"
             type="text"
             placeholder="Alice"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            error={formErrors.firstName}
+            value={firstname}
+            onChange={(e) => setFirstname(e.target.value)}
+            error={formErrors.firstname}
             required
           />
           <Input
-            id="lastName"
+            id="lastname"
             label="Last Name"
             type="text"
             placeholder="Smith"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            error={formErrors.lastName}
+            value={lastname}
+            onChange={(e) => setLastname(e.target.value)}
+            error={formErrors.lastname}
             required
           />
         </div>
@@ -222,13 +192,13 @@ export default function EditTeacherPage() {
             required
           />
           <Input
-            id="phoneNumber"
+            id="phonenumber"
             label="Phone Number"
             type="tel"
             placeholder="e.g., +1 (555) 111-2222"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            error={formErrors.phoneNumber}
+            value={phonenumber}
+            onChange={(e) => setPhonenumber(e.target.value)}
+            error={formErrors.phonenumber}
             required
           />
         </div>
@@ -245,12 +215,12 @@ export default function EditTeacherPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="hireDate"
+            id="hiredate"
             label="Hire Date"
             type="date"
-            value={hireDate}
-            onChange={(e) => setHireDate(e.target.value)}
-            error={formErrors.hireDate}
+            value={hiredate}
+            onChange={(e) => setHiredate(e.target.value)}
+            error={formErrors.hiredate}
           />
           <Input
             id="qualification"

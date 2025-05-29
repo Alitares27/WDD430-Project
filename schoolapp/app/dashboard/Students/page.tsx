@@ -4,17 +4,41 @@ import Input from '../../ui/Input';
 import Button from '@/app/ui/button'; 
 import StudentCard from '@/app/ui/students/StudentCard';
 import { useRouter } from 'next/navigation'; 
-import { Students as DUMMY_STUDENTS } from '../../lib/placeholder-data';
 
 export default function Page() {
-
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [students, setStudents] = useState(DUMMY_STUDENTS);
+  type Student = {
+   id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    grade: string;
+    dateofbirth?: string | null;
+    address?: string | null;
+    phonenumber?: string | null;
+    enrollmentdate?: string | null;
+    parentscontact?: string | null;
+    notes?: string | null;
+    avatarurll?: string | null;
+  };
+
+  const [students, setStudents] = useState<Student[]>([]);
 
   useEffect(() => {
-    
-  }, []); 
+    const fetchStudents = async () => {
+      try {
+        const res = await fetch('/api/students');
+        if (!res.ok) throw new Error('Failed to fetch students');
+        const data = await res.json();
+        setStudents(data);
+      } catch (error) {
+        console.error(error);
+        setStudents([]);
+      }
+    };
+    fetchStudents();
+  }, []);
 
   const filteredStudents = students.filter(student =>
     `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||

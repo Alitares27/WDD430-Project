@@ -1,9 +1,9 @@
-'use client'; 
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import Input from '@/app/ui/Input'; 
-import Button from '@/app/ui/button'; 
-import { useParams, useRouter } from 'next/navigation'; 
+import Input from '@/app/ui/Input';
+import Button from '@/app/ui/button';
+import { useParams, useRouter } from 'next/navigation';
 
 interface Student {
   id: string;
@@ -11,64 +11,19 @@ interface Student {
   lastName: string;
   email: string;
   grade: string;
-  dateOfBirth: string;
-  address: string;
-  phoneNumber: string;
-  avatarUrl?: string;
-  enrollmentDate?: string;
-  parentsContact?: string;
-  notes?: string;
+  dateOfBirth?: string | null;
+  address?: string | null;
+  phoneNumber?: string | null;
+  avatarUrl?: string | null;
+  enrollmentDate?: string | null;
+  parentsContact?: string | null;
+  notes?: string | null;
 }
-
-const DUMMY_STUDENTS_DATA: Student[] = [
-  {
-    id: 's001',
-    firstName: 'Juan',
-    lastName: 'Pérez',
-    email: 'juan.perez@example.com',
-    grade: '10th Grade',
-    dateOfBirth: '2008-03-15',
-    address: '123 Main St, Springfield, USA',
-    phoneNumber: '+1 (555) 123-4567',
-    avatarUrl: '',
-    enrollmentDate: '2022-09-01',
-    parentsContact: 'Maria Pérez: +1 (555) 987-6543',
-    notes: 'Excellent student, strong in mathematics.',
-  },
-  {
-    id: 's002',
-    firstName: 'Ana',
-    lastName: 'Gómez',
-    email: 'ana.gomez@example.com',
-    grade: '9th Grade',
-    dateOfBirth: '2009-07-22',
-    address: '456 Oak Ave, Shelbyville, USA',
-    phoneNumber: '+1 (555) 234-5678',
-    avatarUrl: '',
-    enrollmentDate: '2023-09-01',
-    parentsContact: 'Carlos Gómez: +1 (555) 876-5432',
-    notes: 'Actively participates in school clubs.',
-  },
-  {
-    id: 's003',
-    firstName: 'Carlos',
-    lastName: 'Díaz',
-    email: 'carlos.diaz@example.com',
-    grade: '10th Grade',
-    dateOfBirth: '2008-11-01',
-    address: '789 Pine Ln, Capital City, USA',
-    phoneNumber: '+1 (555) 345-6789',
-    avatarUrl: '',
-    enrollmentDate: '2022-09-01',
-    parentsContact: 'Luisa Díaz: +1 (555) 765-4321',
-    notes: 'Needs to improve attendance.',
-  },
-];
 
 export default function EditStudentPage() {
   const router = useRouter();
   const params = useParams();
-  const studentId = params.id as string; 
+  const studentId = params.id as string;
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -82,32 +37,28 @@ export default function EditStudentPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [saving, setSaving] = useState<boolean>(false);
 
-  
   useEffect(() => {
     const fetchStudentData = async () => {
       setLoading(true);
       setFetchError(null);
       try {
-        const data = DUMMY_STUDENTS_DATA.find(s => s.id === studentId);
+        const res = await fetch(`/api/students/${studentId}`);
+        if (!res.ok) throw new Error('Student not found.');
+        const data: Student = await res.json();
 
-        if (data) {
-          
-          setFirstName(data.firstName || '');
-          setLastName(data.lastName || '');
-          setEmail(data.email || '');
-          setGrade(data.grade || '');
-          setDateOfBirth(data.dateOfBirth || '');
-          setAddress(data.address || '');
-          setPhoneNumber(data.phoneNumber || '');
-          setEnrollmentDate(data.enrollmentDate || '');
-          setParentsContact(data.parentsContact || '');
-          setNotes(data.notes || '');
-        } else {
-          setFetchError('Student not found.');
-        }
+        setFirstName(data.firstName || '');
+        setLastName(data.lastName || '');
+        setEmail(data.email || '');
+        setGrade(data.grade || '');
+        setDateOfBirth(data.dateOfBirth || '');
+        setAddress(data.address || '');
+        setPhoneNumber(data.phoneNumber || '');
+        setEnrollmentDate(data.enrollmentDate || '');
+        setParentsContact(data.parentsContact || '');
+        setNotes(data.notes || '');
       } catch (err) {
-        console.error("Error fetching student data:", err);
         setFetchError('Error loading student data for editing.');
       } finally {
         setLoading(false);
@@ -117,9 +68,9 @@ export default function EditStudentPage() {
     if (studentId) {
       fetchStudentData();
     }
-  }, [studentId]); 
+  }, [studentId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newFormErrors: { [key: string]: string } = {};
@@ -139,24 +90,38 @@ export default function EditStudentPage() {
     setFormErrors(newFormErrors);
 
     if (Object.keys(newFormErrors).length === 0) {
-      const updatedStudentData: Partial<Student> = { 
-        id: studentId, 
-        firstName,
-        lastName,
-        email,
-        grade,
-        dateOfBirth,
-        address,
-        phoneNumber,
-        enrollmentDate,
-        parentsContact,
-        notes,
-      };
+      setSaving(true);
+      try {
+        const updatedStudentData: Partial<Student> = {
+          firstName,
+          lastName,
+          email,
+          grade,
+          dateOfBirth,
+          address,
+          phoneNumber,
+          enrollmentDate,
+          parentsContact,
+          notes,
+        };
 
-      console.log('Updating student data:', updatedStudentData);
+        const res = await fetch(`/api/students/${studentId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedStudentData),
+        });
 
-      alert('Student updated successfully (simulated)!');
-      router.push(`/dashboard/Students/${studentId}`); 
+        if (!res.ok) {
+          throw new Error('Failed to update student.');
+        }
+
+        alert('Student updated successfully!');
+        router.push(`/dashboard/Students/${studentId}`);
+      } catch (err) {
+        setFetchError('Error updating student. Please try again.');
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -261,29 +226,27 @@ export default function EditStudentPage() {
           error={formErrors.phoneNumber}
           required
         />
-        
-        {}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <Input
-              id="enrollmentDate"
-              label="Enrollment Date"
-              type="date"
-              value={enrollmentDate}
-              onChange={(e) => setEnrollmentDate(e.target.value)}
-              error={formErrors.enrollmentDate}
-            />
-            <Input
-              id="parentsContact"
-              label="Parents/Guardians Contact"
-              type="text"
-              placeholder="e.g., Jane Doe: +1 (555) 987-6543"
-              value={parentsContact}
-              onChange={(e) => setParentsContact(e.target.value)}
-              error={formErrors.parentsContact}
-            />
+          <Input
+            id="enrollmentDate"
+            label="Enrollment Date"
+            type="date"
+            value={enrollmentDate || ''}
+            onChange={(e) => setEnrollmentDate(e.target.value)}
+            error={formErrors.enrollmentDate}
+          />
+          <Input
+            id="parentsContact"
+            label="Parents/Guardians Contact"
+            type="text"
+            placeholder="e.g., Jane Doe: +1 (555) 987-6543"
+            value={parentsContact || ''}
+            onChange={(e) => setParentsContact(e.target.value)}
+            error={formErrors.parentsContact}
+          />
         </div>
 
-        {}
         <div className="mb-4">
           <label htmlFor="notes" className="block text-gray-700 text-sm font-bold mb-2">
             Notes
@@ -297,7 +260,7 @@ export default function EditStudentPage() {
               ${formErrors.notes ? 'border-red-500' : 'border-gray-300'}
             `}
             placeholder="Enter any additional notes about the student..."
-            value={notes}
+            value={notes || ''}
             onChange={(e) => setNotes(e.target.value)}
           ></textarea>
           {formErrors.notes && (
@@ -310,11 +273,12 @@ export default function EditStudentPage() {
             type="button"
             variant="secondary"
             onClick={() => router.back()}
+            disabled={saving}
           >
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
-            Save Changes
+          <Button type="submit" variant="primary" disabled={saving}>
+            {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </form>

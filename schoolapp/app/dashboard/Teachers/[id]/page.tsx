@@ -7,84 +7,41 @@ import Image from 'next/image';
 
 interface Teacher {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   email: string;
   subject: string;
-  phoneNumber: string;
-  address?: string; 
-  hireDate?: string;
-  qualification?: string;
-  bio?: string; 
-  avatarUrl?: string;
+  phonenumber?: string | null;
+  address?: string | null;
+  hiredate?: string | null;
+  qualification?: string | null;
+  bio?: string | null;
+  avatarurl?: string | null;
 }
 
-const DUMMY_TEACHERS_DETAIL: Teacher[] = [
-  {
-    id: 't001',
-    firstName: 'Alice',
-    lastName: 'Smith',
-    email: 'alice.smith@example.com',
-    subject: 'Mathematics',
-    phoneNumber: '+1 (555) 111-2222',
-    address: '123 Math Lane, Educaville, USA',
-    hireDate: '2018-08-15',
-    qualification: 'Ph.D. in Mathematics',
-    bio: 'Experienced math teacher with a passion for problem-solving. Enjoys integrating real-world applications into lessons.',
-  },
-  {
-    id: 't002',
-    firstName: 'Bob',
-    lastName: 'Johnson',
-    email: 'bob.johnson@example.com',
-    subject: 'Physics',
-    phoneNumber: '+1 (555) 333-4444',
-    address: '456 Quantum Blvd, Science City, USA',
-    hireDate: '2020-09-01',
-    qualification: 'M.Sc. in Physics Education',
-    bio: 'Dedicated physics educator who believes in hands-on learning. Leads the school robotics club.',
-  },
-  {
-    id: 't003',
-    firstName: 'Carol',
-    lastName: 'Williams',
-    email: 'carol.w@example.com',
-    subject: 'Literature',
-    phoneNumber: '+1 (555) 555-6666',
-    address: '789 Storybook Rd, Booktown, USA',
-    hireDate: '2019-01-20',
-    qualification: 'B.A. in English Literature',
-    bio: 'Passionate about classic literature and creative writing. Organizes the school\'s annual poetry slam.',
-    avatarUrl: 'https://via.placeholder.com/200/FFC107/000000?text=CW',
-  },
-  
-];
-
 export default function TeacherDetailPage() {
-  const router = useRouter(); 
-  const params = useParams(); 
-  const teacherId = params.id as string; 
+  const router = useRouter();
+  const params = useParams();
+  const teacherId = params.id as string;
 
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    
     const fetchTeacherDetails = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const foundTeacher = DUMMY_TEACHERS_DETAIL.find(t => t.id === teacherId);
-        if (foundTeacher) {
-          setTeacher(foundTeacher);
-        } else {
-          setError('Teacher not found.'); 
+        const res = await fetch(`/api/teachers/${teacherId}`);
+        if (!res.ok) {
+          throw new Error('Teacher not found.');
         }
-      } catch (err) {
-        console.error("Error fetching teacher details:", err);
-        setError('Error loading teacher details. Please try again.');
+        const data = await res.json();
+        setTeacher(data);
+      } catch (err: any) {
+        setError(err.message || 'Error loading teacher details. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -93,7 +50,7 @@ export default function TeacherDetailPage() {
     if (teacherId) {
       fetchTeacherDetails();
     }
-  }, [teacherId]); 
+  }, [teacherId]);
 
   if (loading) {
     return (
@@ -132,10 +89,10 @@ export default function TeacherDetailPage() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
           {}
           <div className="flex-shrink-0 w-32 h-32 rounded-full overflow-hidden border-4 border-cyan-500 shadow-md">
-            {teacher.avatarUrl ? (
+            {teacher.avatarurl ? (
               <Image
-                src={teacher.avatarUrl}
-                alt={`Avatar of ${teacher.firstName} ${teacher.lastName}`}
+                src={teacher.avatarurl}
+                alt={`Avatar of ${teacher.firstname} ${teacher.lastname}`}
                 width={128}
                 height={128}
                 objectFit="cover"
@@ -143,19 +100,19 @@ export default function TeacherDetailPage() {
               />
             ) : (
               <div className="w-full h-full bg-green-100 flex items-center justify-center text-cyan-600 text-6xl font-bold">
-                {teacher.firstName.charAt(0).toUpperCase()}
+                {teacher.firstname.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
 
           {}
           <div className="flex-grow text-center md:text-left">
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">{teacher.firstName} {teacher.lastName}</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">{teacher.firstname} {teacher.lastname}</h2>
             <p className="text-xl font-bold text-cyan-900 mb-4">{teacher.subject}</p>
             <p className="text-gray-700 mb-1"><strong>Email:</strong> {teacher.email}</p>
-            <p className="text-gray-700 mb-1"><strong>Phone:</strong> {teacher.phoneNumber}</p>
+            <p className="text-gray-700 mb-1"><strong>Phone:</strong> {teacher.phonenumber}</p>
             {teacher.address && <p className="text-gray-700 mb-1"><strong>Address:</strong> {teacher.address}</p>}
-            {teacher.hireDate && <p className="text-gray-700 mb-1"><strong>Hire Date:</strong> {teacher.hireDate}</p>}
+            {teacher.hiredate && <p className="text-gray-700 mb-1"><strong>Hire Date:</strong> {teacher.hiredate}</p>}
             {teacher.qualification && <p className="text-gray-700 mb-1"><strong>Qualification:</strong> {teacher.qualification}</p>}
           </div>
         </div>

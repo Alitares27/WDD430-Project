@@ -7,52 +7,64 @@ import { useRouter } from 'next/navigation';
 
 export default function AddNewTeacherPage() {
   const router = useRouter(); 
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
+  const [firstname, setFirstname] = useState<string>('');
+  const [lastname, setLastname] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [phonenumber, setPhonenumber] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [hireDate, setHireDate] = useState<string>('');
+  const [hiredate, setHiredate] = useState<string>('');
   const [qualification, setQualification] = useState<string>('');
   const [bio, setBio] = useState<string>('');
-  
+  const [avatarurl, setAvatarurl] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); 
 
     const newErrors: { [key: string]: string } = {};
-    
-    if (!firstName.trim()) newErrors.firstName = 'First Name is required.';
-    if (!lastName.trim()) newErrors.lastName = 'Last Name is required.';
+    if (!firstname.trim()) newErrors.firstname = 'First Name is required.';
+    if (!lastname.trim()) newErrors.lastname = 'Last Name is required.';
     if (!email.trim()) {
       newErrors.email = 'Email is required.';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Email address is invalid.';
     }
     if (!subject.trim()) newErrors.subject = 'Subject is required.';
-    if (!phoneNumber.trim()) newErrors.phoneNumber = 'Phone Number is required.';
-    
+    if (!phonenumber.trim()) newErrors.phonenumber = 'Phone Number is required.';
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      setLoading(true);
       const newTeacherData = {
-        id: `t${Date.now()}`, 
-        firstName,
-        lastName,
+        id: `t${Date.now()}`,
+        firstname,
+        lastname,
         email,
         subject,
-        phoneNumber,
-        address,
-        hireDate,
-        qualification,
-        bio,
+        phonenumber,
+        address: address || null,
+        hiredate: hiredate || null,
+        qualification: qualification || null,
+        bio: bio || null,
+        avatarurl: avatarurl || null,
       };
-      console.log(newTeacherData);
-      alert('Teacher added successfully (simulated)!');
-      router.push('/dashboard/Teachers'); 
+      try {
+        const res = await fetch('/api/teachers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTeacherData),
+        });
+        if (!res.ok) throw new Error('Failed to add teacher');
+        alert('Teacher added successfully!');
+        router.push('/dashboard/Teachers');
+      } catch (err) {
+        alert('Error adding teacher. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -63,23 +75,23 @@ export default function AddNewTeacherPage() {
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="firstName"
+            id="firstname"
             label="First Name"
             type="text"
             placeholder="Jane"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            error={errors.firstName}
+            value={firstname}
+            onChange={(e) => setFirstname(e.target.value)}
+            error={errors.firstname}
             required
           />
           <Input
-            id="lastName"
+            id="lastname"
             label="Last Name"
             type="text"
             placeholder="Doe"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            error={errors.lastName}
+            value={lastname}
+            onChange={(e) => setLastname(e.target.value)}
+            error={errors.lastname}
             required
           />
         </div>
@@ -107,13 +119,13 @@ export default function AddNewTeacherPage() {
             required
           />
           <Input
-            id="phoneNumber"
+            id="phonenumber"
             label="Phone Number"
             type="tel"
             placeholder="e.g., +1 (555) 987-6543"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            error={errors.phoneNumber}
+            value={phonenumber}
+            onChange={(e) => setPhonenumber(e.target.value)}
+            error={errors.phonenumber}
             required
           />
         </div>
@@ -130,12 +142,12 @@ export default function AddNewTeacherPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="hireDate"
+            id="hiredate"
             label="Hire Date"
             type="date"
-            value={hireDate}
-            onChange={(e) => setHireDate(e.target.value)}
-            error={errors.hireDate}
+            value={hiredate}
+            onChange={(e) => setHiredate(e.target.value)}
+            error={errors.hiredate}
           />
           <Input
             id="qualification"
@@ -148,14 +160,23 @@ export default function AddNewTeacherPage() {
           />
         </div>
 
-        {}
+        <Input
+          id="avatarurl"
+          label="Avatar URL"
+          type="text"
+          placeholder="https://example.com/avatar.jpg"
+          value={avatarurl}
+          onChange={(e) => setAvatarurl(e.target.value)}
+          error={errors.avatarurl}
+        />
+
         <div className="mb-4">
           <label htmlFor="bio" className="block text-gray-700 text-sm font-bold mb-2">
             Biography / Notes
           </label>
           <textarea
             id="bio"
-            rows={5} 
+            rows={5}
             className={`
               shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight
               focus:outline-none focus:shadow-outline resize-y
@@ -172,14 +193,15 @@ export default function AddNewTeacherPage() {
 
         <div className="flex justify-end gap-4 mt-8">
           <Button
-            type="button" 
+            type="button"
             variant="secondary"
-            onClick={() => router.back()} 
+            onClick={() => router.back()}
+            disabled={loading}
           >
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
-            Add Teacher
+          <Button type="submit" variant="primary" disabled={loading}>
+            {loading ? 'Adding...' : 'Add Teacher'}
           </Button>
         </div>
       </form>

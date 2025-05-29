@@ -1,26 +1,31 @@
-'use client'; 
+'use client';
 
 import React, { useState } from 'react';
-import Input from '@/app/ui/Input'; 
-import Button from '@/app/ui/button'; 
-import { useRouter } from 'next/navigation'; 
+import Input from '@/app/ui/Input';
+import Button from '@/app/ui/button';
+import { useRouter } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function AddStudentPage() {
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [grade, setGrade] = useState<string>('');
-  const [dateOfBirth, setDateOfBirth] = useState<string>('');
+  const [dateofbirth, setDateofbirth] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [phonenumber, setPhonenumber] = useState<string>('');
+  const [enrollmentdate, setEnrollmentdate] = useState<string>('');
+  const [parentscontact, setParentscontact] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
+  const [avatarurll, setAvatarurll] = useState<string>('');
 
- 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     const newErrors: { [key: string]: string } = {};
 
@@ -32,28 +37,42 @@ export default function AddStudentPage() {
       newErrors.email = 'Email address is invalid.';
     }
     if (!grade.trim()) newErrors.grade = 'Grade is required.';
-    if (!dateOfBirth.trim()) newErrors.dateOfBirth = 'Date of Birth is required.';
-    if (!address.trim()) newErrors.address = 'Address is required.';
-    if (!phoneNumber.trim()) newErrors.phoneNumber = 'Phone Number is required.';
 
-
-    setErrors(newErrors); 
+    setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      setSaving(true);
       const newStudentData = {
+        id: uuidv4(),
         firstName,
         lastName,
         email,
         grade,
-        dateOfBirth,
-        address,
-        phoneNumber,
-        
+        dateofbirth: dateofbirth || null,
+        address: address || null,
+        phonenumber: phonenumber || null,
+        enrollmentdate: enrollmentdate || null,
+        parentscontact: parentscontact || null,
+        notes: notes || null,
+        avatarurll: avatarurll || null,
       };
-      console.log(newStudentData);
 
-      alert('Student added successfully (simulated)!');
-      router.push('/dashboard/Students'); 
+      try {
+        
+        const res = await fetch('/api/students', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newStudentData),
+        });
+
+        if (!res.ok) throw new Error('Failed to add student.');
+
+        router.push('/dashboard/Students');
+      } catch (err) {
+        alert('Error adding student.');
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -100,7 +119,7 @@ export default function AddStudentPage() {
           <Input
             id="grade"
             label="Grade"
-            type="text" 
+            type="text"
             placeholder="e.g., 10th Grade"
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
@@ -108,13 +127,12 @@ export default function AddStudentPage() {
             required
           />
           <Input
-            id="dateOfBirth"
+            id="dateofbirth"
             label="Date of Birth"
             type="date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            error={errors.dateOfBirth}
-            required
+            value={dateofbirth}
+            onChange={(e) => setDateofbirth(e.target.value)}
+            error={errors.dateofbirth}
           />
         </div>
 
@@ -126,32 +144,68 @@ export default function AddStudentPage() {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           error={errors.address}
-          required
         />
 
         <Input
-          id="phoneNumber"
+          id="phonenumber"
           label="Phone Number"
           type="tel"
           placeholder="e.g., +1 (555) 123-4567"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          error={errors.phoneNumber}
-          required
+          value={phonenumber}
+          onChange={(e) => setPhonenumber(e.target.value)}
+          error={errors.phonenumber}
         />
 
-        {}
+        <Input
+          id="enrollmentdate"
+          label="Enrollment Date"
+          type="date"
+          value={enrollmentdate}
+          onChange={(e) => setEnrollmentdate(e.target.value)}
+          error={errors.enrollmentdate}
+        />
+
+        <Input
+          id="parentscontact"
+          label="Parents Contact"
+          type="text"
+          placeholder="Parent's contact info"
+          value={parentscontact}
+          onChange={(e) => setParentscontact(e.target.value)}
+          error={errors.parentscontact}
+        />
+
+        <Input
+          id="notes"
+          label="Notes"
+          type="text"
+          placeholder="Additional notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          error={errors.notes}
+        />
+
+        <Input
+          id="avatarurll"
+          label="Avatar URL"
+          type="text"
+          placeholder=""
+          value={avatarurll}
+          onChange={(e) => setAvatarurll(e.target.value)}
+          error={errors.avatarurll}
+        />
 
         <div className="flex justify-end gap-4 mt-8">
           <Button
-            type="button" 
+            type="button"
             variant="secondary"
-            onClick={() => router.back()} 
+            onClick={() => router.back()}
+            disabled={saving}
           >
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
-            Add Student
+          <Button type="submit" variant="primary" disabled={saving}>
+            {saving ? 'Saving...' : 'Add Student'}
           </Button>
         </div>
       </form>
