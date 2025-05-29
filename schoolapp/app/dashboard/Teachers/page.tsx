@@ -5,6 +5,7 @@ import Input from '@/app/ui/Input';
 import Button from '@/app/ui/button'; 
 import TeacherCard from '@/app/ui/teachers/TeacherCard'; 
 import { useRouter } from 'next/navigation'; 
+import { Teachers as DUMMY_TEACHERS } from '../../lib/placeholder-data';
 
 
 interface Teacher {
@@ -15,14 +16,6 @@ interface Teacher {
   subject: string;
   avatarUrl?: string;
 }
-
-const DUMMY_TEACHERS: Teacher[] = [
-  { id: 't001', firstName: 'Alice', lastName: 'Smith', email: 'alice.smith@example.com', subject: 'Mathematics', avatarUrl: 'https://via.placeholder.com/150/007BFF/FFFFFF?text=AS' },
-  { id: 't002', firstName: 'Bob', lastName: 'Johnson', email: 'bob.johnson@example.com', subject: 'Physics' }, // Sin avatar
-  { id: 't003', firstName: 'Carol', lastName: 'Williams', email: 'carol.w@example.com', subject: 'Literature', avatarUrl: 'https://via.placeholder.com/150/FFC107/000000?text=CW' },
-  { id: 't004', firstName: 'David', lastName: 'Brown', email: 'david.b@example.com', subject: 'Chemistry', avatarUrl: 'https://via.placeholder.com/150/28A745/FFFFFF?text=DB' },
-  { id: 't005', firstName: 'Eve', lastName: 'Miller', email: 'eve.m@example.com', subject: 'History', avatarUrl: 'https://via.placeholder.com/150/DC3545/FFFFFF?text=EM' },
-];
 
 export default function TeachersPage() {
   const router = useRouter();

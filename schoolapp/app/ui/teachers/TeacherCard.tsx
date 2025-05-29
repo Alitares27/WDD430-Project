@@ -1,17 +1,22 @@
 import React from 'react';
-import Image from 'next/image'; 
-import Button from '@/app/ui/button'; 
+import Image from 'next/image';
+import Button from '@/app/ui/button';
 
 interface TeacherCardProps {
   teacher: {
-    id: string;        
-    firstName: string; 
-    lastName: string;  
-    email: string;     
-    subject: string;   
-    avatarUrl?: string; 
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    subject: string;
+    phoneNumber?: string | null;
+    address?: string | null;
+    hireDate?: string | null;
+    qualification?: string | null;
+    bio?: string | null;
+    avatarUrl?: string | null;
   };
-  
+
   onViewDetails?: (teacherId: string) => void;
   onEdit?: (teacherId: string) => void;
   onDelete?: (teacherId: string) => void;
@@ -37,7 +42,6 @@ const TeacherCard: React.FC<TeacherCardProps> = ({
       hover:scale-105
       hover:shadow-lg
     ">
-      {}
       <div className="
         relative
         w-24 h-24
@@ -68,12 +72,10 @@ const TeacherCard: React.FC<TeacherCardProps> = ({
         )}
       </div>
 
-      {}
       <h3 className="text-xl font-semibold text-gray-800 mb-1">{teacher.firstName} {teacher.lastName}</h3>
       <p className="text-cyan-500 text-sm font-semibold mb-1">{teacher.subject}</p>
-      <p className="text-gray-500 text-sm mb-4">{teacher.email}</p>
+      
 
-      {}
       <div className="
         flex flex-wrap
         justify-center
