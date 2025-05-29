@@ -68,7 +68,7 @@ export default function AddStudentPage() {
         if (!res.ok) throw new Error('Failed to add student.');
 
         router.push('/dashboard/Students');
-      } catch (err) {
+      } catch (_err) {
         alert('Error adding student.');
       } finally {
         setSaving(false);

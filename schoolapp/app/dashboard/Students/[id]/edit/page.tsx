@@ -58,7 +58,7 @@ export default function EditStudentPage() {
         setEnrollmentDate(data.enrollmentDate || '');
         setParentsContact(data.parentsContact || '');
         setNotes(data.notes || '');
-      } catch (err) {
+      } catch (_err) {
         setFetchError('Error loading student data for editing.');
       } finally {
         setLoading(false);
@@ -117,7 +117,7 @@ export default function EditStudentPage() {
 
         alert('Student updated successfully!');
         router.push(`/dashboard/Students/${studentId}`);
-      } catch (err) {
+      } catch (_err) {
         setFetchError('Error updating student. Please try again.');
       } finally {
         setSaving(false);
