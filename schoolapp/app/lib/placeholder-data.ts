@@ -91,7 +91,7 @@ const Students = [
         phoneNumber: '555-1234',
         enrollmentDate: '2021-08-20',
         parentsContact: 'María Pérez, 555-5678',
-        notes: 'Buen estudiante',
+        notes: 'Good student',
     },
     {
         id: 's002',

@@ -30,7 +30,7 @@ const DUMMY_STUDENTS_DATA: Student[] = [
     dateOfBirth: '2008-03-15',
     address: '123 Main St, Springfield, USA',
     phoneNumber: '+1 (555) 123-4567',
-    avatarUrl: 'https://via.placeholder.com/200/FF5733/FFFFFF?text=JP',
+    avatarUrl: '',
     enrollmentDate: '2022-09-01',
     parentsContact: 'Maria Pérez: +1 (555) 987-6543',
     notes: 'Excellent student, strong in mathematics.',
@@ -44,7 +44,7 @@ const DUMMY_STUDENTS_DATA: Student[] = [
     dateOfBirth: '2009-07-22',
     address: '456 Oak Ave, Shelbyville, USA',
     phoneNumber: '+1 (555) 234-5678',
-    avatarUrl: 'https://via.placeholder.com/200/33FF57/FFFFFF?text=AG',
+    avatarUrl: '',
     enrollmentDate: '2023-09-01',
     parentsContact: 'Carlos Gómez: +1 (555) 876-5432',
     notes: 'Actively participates in school clubs.',
@@ -58,7 +58,7 @@ const DUMMY_STUDENTS_DATA: Student[] = [
     dateOfBirth: '2008-11-01',
     address: '789 Pine Ln, Capital City, USA',
     phoneNumber: '+1 (555) 345-6789',
-    avatarUrl: 'https://via.placeholder.com/200/3357FF/FFFFFF?text=CD',
+    avatarUrl: '',
     enrollmentDate: '2022-09-01',
     parentsContact: 'Luisa Díaz: +1 (555) 765-4321',
     notes: 'Needs to improve attendance.',
@@ -69,8 +69,6 @@ export default function EditStudentPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string; 
-
-  
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
