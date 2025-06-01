@@ -15,7 +15,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: result.message });
-  } catch (error) {
+  } catch  {
     return NextResponse.json(
       { error: 'Failed to delete student.' },
       { status: 500 }

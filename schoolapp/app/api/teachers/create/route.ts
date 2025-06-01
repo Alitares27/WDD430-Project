@@ -14,8 +14,7 @@ export async function POST(request: Request) {
       { message: 'Teacher created', teacher: result },
       { status: 201 }
     );
-  } catch (error) {
-    console.error('API error:', error);
+  } catch  {
     return NextResponse.json(
       { error: 'Server error. Failed to create teacher.' },
       { status: 500 }

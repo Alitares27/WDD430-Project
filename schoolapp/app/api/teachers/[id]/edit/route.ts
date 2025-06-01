@@ -22,8 +22,7 @@ export async function PUT(
         await updateTeacher(updatedTeacher);
 
         return NextResponse.json(updatedTeacher);
-    } catch (error) {
-        console.error('Update error:', error); 
+    } catch  {
         return NextResponse.json({ error: 'Failed to update teacher.' }, { status: 500 });
     }
 }
