@@ -82,12 +82,12 @@ export async function PUT(
 
     const result = await updateStudent({ id, ...body });
 
-    if (result?.error) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+    if (result.errors) {
+       return NextResponse.json({ errors: result.errors, message: result.message }, { status: 400 });
     }
 
     return NextResponse.json({ message: 'Student updated successfully', student: result });
-  } catch  {
+  } catch {
     return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
   }
 }
