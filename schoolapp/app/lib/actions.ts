@@ -196,16 +196,16 @@ export type TeacherState = {
 export async function createTeacher(jsonData: any): Promise<TeacherState> {
   console.log('Received data:', jsonData);
   const validation = CreateTeacher.safeParse({
-    firstname: jsonData.firstname ?? null,
-    lastname: jsonData.lastname ?? null,
-    email: jsonData.email ?? null,
-    subject: jsonData.subject ?? null,
-    phonenumber: jsonData.phonenumber ?? null,
-    address: jsonData.address ?? null,
-    hiredate: jsonData.hiredate ?? null,
-    qualification: jsonData.qualification ?? null,
-    bio: jsonData.bio ?? null,
-    avatarurl: jsonData.avatarurl ?? null,
+    firstname: jsonData.firstname,
+    lastname: jsonData.lastname,
+    email: jsonData.email,
+    subject: jsonData.subject,
+    phonenumber: jsonData.phonenumber,
+    address: jsonData.address,
+    hiredate: jsonData.hiredate,
+    qualification: jsonData.qualification,
+    bio: jsonData.bio,
+    avatarurl: jsonData.avatarurl,
   });
 
   if (!validation.success) {
@@ -216,22 +216,19 @@ export async function createTeacher(jsonData: any): Promise<TeacherState> {
   }
 
   const {
-    firstname, lastname, email, subject, phonenumber, address,
-    hiredate, qualification, bio, avatarurl,
+    firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio, avatarurl,
   } = validation.data;
 
   try {
-    
-    const result = await sql`
-      INSERT INTO teachers (
-        firstname, lastname, email, subject, phonenumber,
-        address, hiredate, qualification, bio, avatarurl
-      ) VALUES (
-        ${firstname}, ${lastname}, ${email}, ${subject}, ${phonenumber ?? null},
-        ${address ?? null}, ${hiredate ?? null}, ${qualification ?? null}, ${bio ?? null}, ${avatarurl ?? null}
-      )
-    `;
+    await sql`
+            INSERT INTO teachers (
+                firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio, avatarurl
+            ) VALUES (
+                ${firstname}, ${lastname}, ${email}, ${subject}, ${phonenumber ?? null}, ${address ?? null}, ${hiredate ?? null}, ${qualification ?? null}, ${bio ?? null}, ${avatarurl ?? null}
+            )
+        `;
 
+    return { message: 'Teacher created successfully.' };
   } catch (error) {
     console.error('SQL Error:', error);
     return {
