@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getTeachers } from '@/app/lib/data';
 import { updateTeacher } from '@/app/lib/actions';
+import type { Teacher } from '@/app/lib/definitions';
 
 export async function PUT(
     request: Request,
@@ -10,13 +11,13 @@ export async function PUT(
         const { id } = params;
         const body = await request.json();
 
-        const teachers = await getTeachers();
-        const teacherIndex = teachers.findIndex((t: any) => String(t.id) === id);
+        const teachers: Teacher[] = await getTeachers();
+        const teacherIndex = teachers.findIndex((t: Teacher) => String(t.id) === id);
 
         if (teacherIndex === -1) {
             return NextResponse.json({ error: 'Teacher not found.' }, { status: 404 });
         }
-        const updatedTeacher = { ...teachers[teacherIndex], ...body };
+        const updatedTeacher: Teacher = { ...teachers[teacherIndex], ...body };
         await updateTeacher(updatedTeacher);
         return NextResponse.json(updatedTeacher);
     } catch  {

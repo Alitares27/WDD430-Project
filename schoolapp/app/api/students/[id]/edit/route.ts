@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getStudents } from '@/app/lib/data';
 import { updateStudent } from '@/app/lib/actions';
+import type { Student } from '@/app/lib/definitions';
 
 export async function PUT(
     request: Request,
@@ -10,13 +11,13 @@ export async function PUT(
         const { id } = params;
         const body = await request.json();
 
-        const students = await getStudents();
-        const studentIndex = students.findIndex((s: any) => String(s.id) === id);
+        const students: Student[] = await getStudents();
+        const studentIndex = students.findIndex((s: Student) => String(s.id) === id);
 
         if (studentIndex === -1) {
             return NextResponse.json({ error: 'Student not found.' }, { status: 404 });
         }
-        const updatedStudent = { ...students[studentIndex], ...body };
+        const updatedStudent: Student = { ...students[studentIndex], ...body };
         await updateStudent(updatedStudent);
         return NextResponse.json(updatedStudent);
     } catch  {
