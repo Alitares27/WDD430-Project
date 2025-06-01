@@ -9,9 +9,9 @@ export default function Page() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   type Student = {
-   id: string;
-    firstName: string;
-    lastName: string;
+    id: string;
+    firstname: string;
+    lastname: string;
     email: string;
     grade: string;
     dateofbirth?: string | null;
@@ -20,7 +20,7 @@ export default function Page() {
     enrollmentdate?: string | null;
     parentscontact?: string | null;
     notes?: string | null;
-    avatarurll?: string | null;
+    avatarurl?: string;
   };
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -41,7 +41,7 @@ export default function Page() {
   }, []);
 
   const filteredStudents = students.filter(student =>
-    `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${student.firstname} ${student.lastname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.grade.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -55,12 +55,28 @@ export default function Page() {
     router.push(`/dashboard/Students/${id}/edit`);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm(`Are you sure you want to delete the student with ID: ${id}? This action is irreversible.`)) {
-      setStudents(prevStudents => prevStudents.filter(student => student.id !== id));
-      alert(`Student with ID: ${id} deleted.`);
+  const handleDelete = async (id: string) => {
+  if (window.confirm(`Are you sure you want to delete student ${id}?`)) {
+    try {
+      const res = await fetch(`/api/students/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setStudents(prev => prev.filter(student => student.id !== id));
+        alert(`Student with ID ${id} deleted.`);
+        router.push('/dashboard/Students');
+      } else {
+        const data = await res.json();
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An unexpected error occurred.');
     }
-  };
+  }
+};
+
 
   const handleAddNewStudent = () => {
     router.push('/dashboard/Students/Create');

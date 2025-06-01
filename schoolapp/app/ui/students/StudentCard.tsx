@@ -5,17 +5,17 @@ import Button from '@/app/ui/button';
 interface StudentCardProps {
     student: {
         id: string;
-        firstName: string;
-        lastName: string;
+        firstname: string;
+        lastname: string;
         email: string;
         grade: string;
-        dateOfBirth?: string | null;
+        dateofbirth?: string | null;
         address?: string | null;
-        phoneNumber?: string | null;
-        enrollmentDate?: string | null;
-        parentsContact?: string | null;
+        phonenumber?: string | null;
+        enrollmentdate?: string | null;
+        parentscontact?: string | null;
         notes?: string | null;
-        avatarUrl?: string;
+        avatarurl?: string;
     };
 
     onViewDetails?: (studentId: string) => void;
@@ -29,7 +29,7 @@ const StudentCard: React.FC<StudentCardProps> = ({
     onEdit,
     onDelete,
 }) => {
-    const fullName = `${student.firstName} ${student.lastName}`;
+    const fullName = `${student.firstname} ${student.lastname}`;
 
     return (
         <div className="
@@ -37,9 +37,9 @@ const StudentCard: React.FC<StudentCardProps> = ({
         ">
             <div className="
                 relative w-24 h-24 mb-4 rounded-full overflow-hidden border-2 border-blue-500">
-                {student.avatarUrl ? (
+                {student.avatarurl ? (
                     <Image
-                        src={student.avatarUrl}
+                        src={student.avatarurl}
                         alt={`Avatar de ${fullName}`}
                         layout="fill"
                         objectFit="cover"
@@ -48,15 +48,16 @@ const StudentCard: React.FC<StudentCardProps> = ({
                 ) : (
                     <div className="
                         w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 text-5xl font-bold">
-                        {student.firstName.charAt(0).toUpperCase()}
+                        {(student.firstname ? student.firstname.charAt(0).toUpperCase() : '')}
                     </div>
                 )}
             </div>
 
             <h3 className="text-xl font-semibold text-gray-800 mb-1">{fullName}</h3>
             <p className="text-cyan-800 text-sm font-medium">{student.grade}</p>
+            <p className="text-gray-600 text-sm mt-1 py-2">{student.email}</p>
             
-            <div className="flex flex-wrap justify-center gap-2 mt-auto">
+            <div className="flex flex-wrap justify-center gap-2 mt-auto px-3">
                 {onViewDetails && (
                     <Button
                         onClick={() => onViewDetails(student.id)}

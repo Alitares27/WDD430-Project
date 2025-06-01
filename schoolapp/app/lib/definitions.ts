@@ -1,7 +1,7 @@
 export type Student = {
     id: string;
-    firstName: string;
-    lastName: string;
+    firstname: string;
+    lastname: string;
     email: string;
     grade: string;
     dateofbirth?: string | null;
@@ -10,7 +10,7 @@ export type Student = {
     enrollmentdate?: string | null;
     parentscontact?: string | null;
     notes?: string | null;
-    avatarurll?: string | null;
+    avatarurl?: string | null;
 };
 
 export type Teacher = {

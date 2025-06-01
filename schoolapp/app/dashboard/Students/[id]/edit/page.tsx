@@ -7,16 +7,16 @@ import { useParams, useRouter } from 'next/navigation';
 
 interface Student {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   email: string;
   grade: string;
-  dateOfBirth?: string | null;
+  dateofbirth?: string | null;
   address?: string | null;
-  phoneNumber?: string | null;
-  avatarUrl?: string | null;
-  enrollmentDate?: string | null;
-  parentsContact?: string | null;
+  phonenumber?: string | null;
+  avatarurl?: string | null;
+  enrollmentdate?: string | null;
+  parentscontact?: string | null;
   notes?: string | null;
 }
 
@@ -24,15 +24,15 @@ export default function EditStudentPage() {
   const router = useRouter();
   const params = useParams();
   const studentId = params.id as string;
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
+  const [firstname, setFirstname] = useState<string>('');
+  const [lastname, setLastname] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [grade, setGrade] = useState<string>('');
-  const [dateOfBirth, setDateOfBirth] = useState<string>('');
+  const [dateofbirth, setDateofbirth] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [enrollmentDate, setEnrollmentDate] = useState<string>('');
-  const [parentsContact, setParentsContact] = useState<string>('');
+  const [phonenumber, setPhonenumber] = useState<string>('');
+  const [enrollmentdate, setEnrollmentdate] = useState<string>('');
+  const [parentscontact, setParentscontact] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -48,15 +48,15 @@ export default function EditStudentPage() {
         if (!res.ok) throw new Error('Student not found.');
         const data: Student = await res.json();
 
-        setFirstName(data.firstName || '');
-        setLastName(data.lastName || '');
+        setFirstname(data.firstname || '');
+        setLastname(data.lastname || '');
         setEmail(data.email || '');
         setGrade(data.grade || '');
-        setDateOfBirth(data.dateOfBirth || '');
+        setDateofbirth(data.dateofbirth || '');
         setAddress(data.address || '');
-        setPhoneNumber(data.phoneNumber || '');
-        setEnrollmentDate(data.enrollmentDate || '');
-        setParentsContact(data.parentsContact || '');
+        setPhonenumber(data.phonenumber || '');
+        setEnrollmentdate(data.enrollmentdate || '');
+        setParentscontact(data.parentscontact || '');
         setNotes(data.notes || '');
       } catch (_err) {
         setFetchError('Error loading student data for editing.');
@@ -75,17 +75,17 @@ export default function EditStudentPage() {
 
     const newFormErrors: { [key: string]: string } = {};
 
-    if (!firstName.trim()) newFormErrors.firstName = 'First Name is required.';
-    if (!lastName.trim()) newFormErrors.lastName = 'Last Name is required.';
+    if (!firstname.trim()) newFormErrors.firstname = 'First Name is required.';
+    if (!lastname.trim()) newFormErrors.lastname = 'Last Name is required.';
     if (!email.trim()) {
       newFormErrors.email = 'Email is required.';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newFormErrors.email = 'Email address is invalid.';
     }
     if (!grade.trim()) newFormErrors.grade = 'Grade is required.';
-    if (!dateOfBirth.trim()) newFormErrors.dateOfBirth = 'Date of Birth is required.';
+    if (!dateofbirth.trim()) newFormErrors.dateofbirth = 'Date of Birth is required.';
     if (!address.trim()) newFormErrors.address = 'Address is required.';
-    if (!phoneNumber.trim()) newFormErrors.phoneNumber = 'Phone Number is required.';
+    if (!phonenumber.trim()) newFormErrors.phonenumber = 'Phone Number is required.';
 
     setFormErrors(newFormErrors);
 
@@ -93,16 +93,7 @@ export default function EditStudentPage() {
       setSaving(true);
       try {
         const updatedStudentData: Partial<Student> = {
-          firstName,
-          lastName,
-          email,
-          grade,
-          dateOfBirth,
-          address,
-          phoneNumber,
-          enrollmentDate,
-          parentsContact,
-          notes,
+          firstname,lastname,email,grade,dateofbirth,address,phonenumber,enrollmentdate,parentscontact,notes,
         };
 
         const res = await fetch(`/api/students/${studentId}`, {
@@ -151,23 +142,23 @@ export default function EditStudentPage() {
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="firstName"
+            id="firstname"
             label="First Name"
             type="text"
             placeholder="John"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            error={formErrors.firstName}
+            value={firstname}
+            onChange={(e) => setFirstname(e.target.value)}
+            error={formErrors.firstname}
             required
           />
           <Input
-            id="lastName"
+            id="lastname"
             label="Last Name"
             type="text"
             placeholder="Doe"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            error={formErrors.lastName}
+            value={lastname}
+            onChange={(e) => setLastname(e.target.value)}
+            error={formErrors.lastname}
             required
           />
         </div>
@@ -195,12 +186,12 @@ export default function EditStudentPage() {
             required
           />
           <Input
-            id="dateOfBirth"
+            id="dateofbirth"
             label="Date of Birth"
             type="date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            error={formErrors.dateOfBirth}
+            value={dateofbirth}
+            onChange={(e) => setDateofbirth(e.target.value)}
+            error={formErrors.dateofbirth}
             required
           />
         </div>
@@ -217,33 +208,33 @@ export default function EditStudentPage() {
         />
 
         <Input
-          id="phoneNumber"
+          id="phonenumber"
           label="Phone Number"
           type="tel"
           placeholder="e.g., +1 (555) 123-4567"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          error={formErrors.phoneNumber}
+          value={phonenumber}
+          onChange={(e) => setPhonenumber(e.target.value)}
+          error={formErrors.phonenumber}
           required
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="enrollmentDate"
+            id="enrollmentdate"
             label="Enrollment Date"
             type="date"
-            value={enrollmentDate || ''}
-            onChange={(e) => setEnrollmentDate(e.target.value)}
-            error={formErrors.enrollmentDate}
+            value={enrollmentdate || ''}
+            onChange={(e) => setEnrollmentdate(e.target.value)}
+            error={formErrors.enrollmentdate}
           />
           <Input
-            id="parentsContact"
+            id="parentscontact"
             label="Parents/Guardians Contact"
             type="text"
             placeholder="e.g., Jane Doe: +1 (555) 987-6543"
-            value={parentsContact || ''}
-            onChange={(e) => setParentsContact(e.target.value)}
-            error={formErrors.parentsContact}
+            value={parentscontact || ''}
+            onChange={(e) => setParentscontact(e.target.value)}
+            error={formErrors.parentscontact}
           />
         </div>
 

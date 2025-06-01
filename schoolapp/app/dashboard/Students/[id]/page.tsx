@@ -1,21 +1,21 @@
-'use client'; 
+'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation'; 
-import Button from '@/app/ui/button'; 
-import Image from 'next/image'; 
+import { useParams, useRouter } from 'next/navigation';
+import Button from '@/app/ui/button';
+import Image from 'next/image';
 interface Student {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   email: string;
   grade: string;
-  dateOfBirth?: string | null;
+  dateofbirth?: string | null;
   address?: string | null;
-  phoneNumber?: string | null;
-  avatarUrl?: string | null;
-  enrollmentDate?: string | null;
-  parentsContact?: string | null;
+  phonenumber?: string | null;
+  avatarurl?: string | null;
+  enrollmentdate?: string | null;
+  parentscontact?: string | null;
   notes?: string | null;
 }
 
@@ -87,12 +87,12 @@ export default function StudentDetailPage() {
 
       <div className="bg-white rounded-lg shadow-md p-8 mb-6">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-          {}
+          { }
           <div className="flex-shrink-0 w-32 h-32 rounded-full overflow-hidden border-4 border-blue-500 shadow-md">
-            {student.avatarUrl ? (
+            {student.avatarurl ? (
               <Image
-                src={student.avatarUrl}
-                alt={`Avatar of ${student.firstName} ${student.lastName}`}
+                src={student.avatarurl}
+                alt={`Avatar of ${student.firstname} ${student.lastname}`}
                 width={128}
                 height={128}
                 objectFit="cover"
@@ -100,25 +100,35 @@ export default function StudentDetailPage() {
               />
             ) : (
               <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 text-6xl font-bold">
-                {student.firstName.charAt(0).toUpperCase()}
+                {(student.firstname ? student.firstname.charAt(0).toUpperCase() : '')}
               </div>
             )}
           </div>
 
-          {}
+          { }
           <div className="flex-grow text-center md:text-left">
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">{student.firstName} {student.lastName}</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">{student.firstname} {student.lastname}</h2>
             <p className="text-xl text-blue-600 mb-4">{student.grade}</p>
             <p className="text-gray-700 mb-1"><strong>Email:</strong> {student.email}</p>
-            <p className="text-gray-700 mb-1"><strong>Phone:</strong> {student.phoneNumber}</p>
-            <p className="text-gray-700 mb-1"><strong>Date of Birth:</strong> {student.dateOfBirth}</p>
+            <p className="text-gray-700 mb-1"><strong>Phone:</strong> {student.phonenumber}</p>
+            <p className="text-gray-700 mb-1">
+              <strong>Date of Birth:</strong>{" "}
+              {student.dateofbirth ? new Date(student.dateofbirth).toISOString().split("T")[0] : "N/A"}
+            </p>
             <p className="text-gray-700 mb-1"><strong>Address:</strong> {student.address}</p>
-            {student.enrollmentDate && <p className="text-gray-700 mb-1"><strong>Enrollment Date:</strong> {student.enrollmentDate}</p>}
-            {student.parentsContact && <p className="text-gray-700 mb-1"><strong>Parents Contact:</strong> {student.parentsContact}</p>}
+            {student.enrollmentdate && (
+              <p className="text-gray-700 mb-1">
+                <strong>Enrollment Date:</strong>{" "}
+                {student.enrollmentdate ? new Date(student.enrollmentdate).toISOString().split("T")[0] : "N/A"}
+              </p>
+            )}
+            {student.parentscontact && <p className="text-gray-700 mb-1"><strong>Parents Contact:</strong> {student.parentscontact}</p>}
+            {student.notes && <p className="text-gray-700 mb-1"><strong>Notes:</strong> {student.notes}</p>}
+
           </div>
         </div>
 
-        {}
+        { }
         {student.notes && (
           <div className="mt-8 pt-6 border-t border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-3">Notes</h3>
@@ -127,16 +137,32 @@ export default function StudentDetailPage() {
         )}
       </div>
 
-      {}
+      { }
       <div className="flex justify-between md:justify-end gap-4 mt-6">
         <Button variant="secondary" onClick={() => router.back()}>
           Go Back
         </Button>
         <Button variant="primary" onClick={() => router.push(`/dashboard/Students/${student.id}/edit`)}>
-          Edit 
+          Edit
         </Button>
-        <Button variant="danger" onClick={() => alert('Delete logic for student: ' + student.id)}>
-          Delete 
+        <Button
+          variant="danger"
+          className="bg-red-600 hover:bg-red-700"
+          onClick={async () => {
+            if (confirm(`Are you sure you want to delete ${student.firstname}?`)) {
+              const res = await fetch(`/api/students/${student.id}`, { method: 'DELETE' });
+
+              if (res.ok) {
+                alert('Student deleted successfully.');
+                router.push('/dashboard/Students');
+              } else {
+                const errorData = await res.json();
+                alert(`Error: ${errorData.error}`);
+              }
+            }
+          }}
+        >
+          Delete
         </Button>
       </div>
     </div>

@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import Input from '@/app/ui/Input';
 import Button from '@/app/ui/button';
 import { useRouter } from 'next/navigation';
-import { v4 as uuidv4 } from 'uuid';
+import { createStudent } from '@/app/lib/actions';
 
 export default function AddStudentPage() {
   const router = useRouter();
 
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
+  const [firstname, setFirstName] = useState<string>('');
+  const [lastname, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [grade, setGrade] = useState<string>('');
   const [dateofbirth, setDateofbirth] = useState<string>('');
@@ -19,61 +19,40 @@ export default function AddStudentPage() {
   const [enrollmentdate, setEnrollmentdate] = useState<string>('');
   const [parentscontact, setParentscontact] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
-  const [avatarurll, setAvatarurll] = useState<string>('');
+  const [avatarurl, setAvatarurl] = useState<string>('');
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: { [key: string]: string } = {};
+    setSaving(true);
+    setErrors({});
 
-    if (!firstName.trim()) newErrors.firstName = 'First Name is required.';
-    if (!lastName.trim()) newErrors.lastName = 'Last Name is required.';
-    if (!email.trim()) {
-      newErrors.email = 'Email is required.';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email address is invalid.';
+    const studentData = {
+      firstname,
+      lastname,
+      email,
+      grade,
+      dateofbirth: dateofbirth || null,
+      address: address || null,
+      phonenumber: phonenumber || null,
+      enrollmentdate: enrollmentdate || null,
+      parentscontact: parentscontact || null,
+      notes: notes || null,
+      avatarurl: avatarurl || null,
+    };
+
+    const result = await createStudent(studentData);
+
+    if (result.errors) {
+      setErrors(result.errors);
+      setSaving(false);
+      return;
     }
-    if (!grade.trim()) newErrors.grade = 'Grade is required.';
 
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      setSaving(true);
-      const newStudentData = {
-        id: uuidv4(),
-        firstName,
-        lastName,
-        email,
-        grade,
-        dateofbirth: dateofbirth || null,
-        address: address || null,
-        phonenumber: phonenumber || null,
-        enrollmentdate: enrollmentdate || null,
-        parentscontact: parentscontact || null,
-        notes: notes || null,
-        avatarurll: avatarurll || null,
-      };
-
-      try {
-        
-        const res = await fetch('/api/students', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newStudentData),
-        });
-
-        if (!res.ok) throw new Error('Failed to add student.');
-
-        router.push('/dashboard/Students');
-      } catch (_err) {
-        alert('Error adding student.');
-      } finally {
-        setSaving(false);
-      }
-    }
+    router.push('/dashboard/Students');
   };
 
   return (
@@ -83,23 +62,23 @@ export default function AddStudentPage() {
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Input
-            id="firstName"
+            id="firstname"
             label="First Name"
             type="text"
             placeholder="John"
-            value={firstName}
+            value={firstname}
             onChange={(e) => setFirstName(e.target.value)}
-            error={errors.firstName}
+            error={errors.firstname?.join(', ')}
             required
           />
           <Input
-            id="lastName"
+            id="lastname"
             label="Last Name"
             type="text"
             placeholder="Doe"
-            value={lastName}
+            value={lastname}
             onChange={(e) => setLastName(e.target.value)}
-            error={errors.lastName}
+            error={errors.lastname?.join(', ')}
             required
           />
         </div>
@@ -111,7 +90,7 @@ export default function AddStudentPage() {
           placeholder="john.doe@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
+          error={errors.email?.join(', ')}
           required
         />
 
@@ -123,7 +102,7 @@ export default function AddStudentPage() {
             placeholder="e.g., 10th Grade"
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
-            error={errors.grade}
+            error={errors.grade?.join(', ')}
             required
           />
           <Input
@@ -132,7 +111,7 @@ export default function AddStudentPage() {
             type="date"
             value={dateofbirth}
             onChange={(e) => setDateofbirth(e.target.value)}
-            error={errors.dateofbirth}
+            error={errors.dateofbirth?.join(', ')}
           />
         </div>
 
@@ -143,7 +122,7 @@ export default function AddStudentPage() {
           placeholder="123 Main St, Anytown, USA"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          error={errors.address}
+          error={errors.address?.join(', ')}
         />
 
         <Input
@@ -153,7 +132,7 @@ export default function AddStudentPage() {
           placeholder="e.g., +1 (555) 123-4567"
           value={phonenumber}
           onChange={(e) => setPhonenumber(e.target.value)}
-          error={errors.phonenumber}
+          error={errors.phonenumber?.join(', ')}
         />
 
         <Input
@@ -162,7 +141,7 @@ export default function AddStudentPage() {
           type="date"
           value={enrollmentdate}
           onChange={(e) => setEnrollmentdate(e.target.value)}
-          error={errors.enrollmentdate}
+          error={errors.enrollmentdate?.join(', ')}
         />
 
         <Input
@@ -172,7 +151,7 @@ export default function AddStudentPage() {
           placeholder="Parent's contact info"
           value={parentscontact}
           onChange={(e) => setParentscontact(e.target.value)}
-          error={errors.parentscontact}
+          error={errors.parentscontact?.join(', ')}
         />
 
         <Input
@@ -182,17 +161,17 @@ export default function AddStudentPage() {
           placeholder="Additional notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          error={errors.notes}
+          error={errors.notes?.join(', ')}
         />
 
         <Input
-          id="avatarurll"
+          id="avatarurl"
           label="Avatar URL"
           type="text"
           placeholder=""
-          value={avatarurll}
-          onChange={(e) => setAvatarurll(e.target.value)}
-          error={errors.avatarurll}
+          value={avatarurl}
+          onChange={(e) => setAvatarurl(e.target.value)}
+          error={errors.avatarurl?.join(', ')}
         />
 
         <div className="flex justify-end gap-4 mt-8">

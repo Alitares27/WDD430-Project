@@ -2,8 +2,6 @@ import postgres from "postgres";
 import { Student, Teacher } from "./definitions";
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-
-
 export async function getStudents() {
   try {
     const students = await sql<Student[]>`

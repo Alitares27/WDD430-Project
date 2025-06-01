@@ -1,27 +1,16 @@
 'use server';
+import postgres from 'postgres';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import postgres from 'postgres';
-
-
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const StudentFormSchema = z.object({
     id: z.string().optional(),
-    firstname: z.string({
-        required_error: 'First name is required.',
-    }).min(1, { message: 'First name cannot be empty.' }),
-    lastname: z.string({
-        required_error: 'Last name is required.',
-    }).min(1, { message: 'Last name cannot be empty.' }),
-    email: z.string({
-        required_error: 'Email is required.',
-    }).email({ message: 'Invalid email address.' }),
-    grade: z.string({
-        required_error: 'Grade is required.',
-    }).min(1, { message: 'Grade cannot be empty.' }),
+    firstname: z.string().min(1, { message: 'First name cannot be empty.' }),
+    lastname: z.string().min(1, { message: 'Last name cannot be empty.' }),
+    email: z.string().email({ message: 'Invalid email address.' }),
+    grade: z.string().min(1, { message: 'Grade cannot be empty.' }),
     dateofbirth: z.string().nullable().optional(),
     address: z.string().nullable().optional(),
     phonenumber: z.string().nullable().optional(),
@@ -50,20 +39,19 @@ export type StudentState = {
     message?: string | null;
 };
 
-export async function createStudent(prevState: StudentState, formData: FormData) {
-
+export async function createStudent(jsonData: any): Promise<StudentState> {
     const validatedFields = CreateStudent.safeParse({
-        firstname: formData.get('firstname'),
-        lastname: formData.get('lastname'),
-        email: formData.get('email'),
-        grade: formData.get('grade'),
-        dateofbirth: formData.get('dateofbirth') || null,
-        address: formData.get('address') || null,
-        phonenumber: formData.get('phonenumber') || null,
-        enrollmentdate: formData.get('enrollmentdate') || null,
-        parentscontact: formData.get('parentscontact') || null,
-        notes: formData.get('notes') || null,
-        avatarurl: formData.get('avatarurl') || null,
+        firstname: jsonData.firstname ?? null,
+        lastname: jsonData.lastname ?? null,
+        email: jsonData.email ?? null,
+        grade: jsonData.grade ?? null,
+        dateofbirth: jsonData.dateofbirth ?? null,
+        address: jsonData.address ?? null,
+        phonenumber: jsonData.phonenumber ?? null,
+        enrollmentdate: jsonData.enrollmentdate ?? null,
+        parentscontact: jsonData.parentscontact ?? null,
+        notes: jsonData.notes ?? null,
+        avatarurl: jsonData.avatarurl ?? null,
     });
 
     if (!validatedFields.success) {
@@ -74,164 +62,42 @@ export async function createStudent(prevState: StudentState, formData: FormData)
     }
 
     const {
-        firstname,
-        lastname,
-        email,
-        grade,
-        dateofbirth,
-        address,
-        phonenumber,
-        enrollmentdate,
-        parentscontact,
-        notes,
-        avatarurl,
+        firstname, lastname, email, grade, dateofbirth, address, phonenumber, enrollmentdate, parentscontact, notes, avatarurl,
     } = validatedFields.data;
-
-    const safefirstname = firstname ?? null;
-    const safelastname = lastname ?? null;
-    const safeEmail = email ?? null;
-    const safeGrade = grade ?? null;
-    const safedateofbirth = dateofbirth ?? null;
-    const safeAddress = address ?? null;
-    const safephonenumber = phonenumber ?? null;
-    const safeenrollmentdate = enrollmentdate ?? null;
-    const safeparentscontact = parentscontact ?? null;
-    const safeNotes = notes ?? null;
-    const safeAvatarurl = avatarurl ?? null;
 
     try {
         await sql`
             INSERT INTO students (
                 firstname, lastname, email, grade, dateofbirth, address, phonenumber, enrollmentdate, parentscontact, notes, avatarurl
             ) VALUES (
-                ${safefirstname}, ${safelastname}, ${safeEmail}, ${safeGrade}, ${safedateofbirth}, ${safeAddress}, ${safephonenumber}, ${safeenrollmentdate}, ${safeparentscontact}, ${safeNotes}, ${safeAvatarurl}
+                ${firstname}, ${lastname}, ${email}, ${grade}, ${dateofbirth ?? null}, ${address ?? null}, ${phonenumber ?? null}, ${enrollmentdate ?? null}, ${parentscontact ?? null}, ${notes ?? null}, ${avatarurl ?? null}
             )
         `;
-   
-    } catch {
+        return { message: 'Student created successfully.' };
+    } catch (error) {
+        console.error('SQL Error:', error);
         return {
             message: 'Database error: Could not create student.',
         };
     }
-    revalidatePath('/dashboard/Students');
-    redirect('/dashboard/Students');
 }
 
-const CreateTeacher = StudentFormSchema.omit({ id: true });
-export type TeacherState = {
-    errors?: {
-        firstname?: string[];
-        lastname?: string[];
-        email?: string[];
-        subject?: string[];
-        phonenumber?: string[];
-        address?: string[];
-        hireDate?: string[];
-        qualification?: string[];
-        bio?: string[];
-        avatarUrl?: string[];
-    };
-    message?: string | null;
-};
-
-export async function createTeacher(prevState: TeacherState, formData: FormData) {
-
-    const TeacherFormSchema = z.object({
-        firstname: z.string({
-            required_error: 'First name is required.',
-        }).min(1, { message: 'First name cannot be empty.' }),
-        lastname: z.string({
-            required_error: 'Last name is required.',
-        }).min(1, { message: 'Last name cannot be empty.' }),
-        email: z.string({
-            required_error: 'Email is required.',
-        }).email({ message: 'Invalid email address.' }),
-        subject: z.string({
-            required_error: 'Subject is required.',
-        }).min(1, { message: 'Subject cannot be empty.' }),
-        phonenumber: z.string().nullable().optional(),
-        address: z.string().nullable().optional(),
-        hiredate: z.string().nullable().optional(),
-        qualification: z.string().nullable().optional(),
-        bio: z.string().nullable().optional(),
-        avatarurl: z.string().nullable().optional(),
-    });
-
-    const validatedFields = TeacherFormSchema.safeParse({
-        firstname: formData.get('firstname'),
-        lastname: formData.get('lastname'),
-        email: formData.get('email'),
-        subject: formData.get('subject'),
-        phonenumber: formData.get('phonenumber') || null,
-        address: formData.get('address') || null,
-        hiredate: formData.get('hiredate') || null,
-        qualification: formData.get('qualification'),
-        bio: formData.get('bio') || null,
-        avatarurl: formData.get('avatarurl') || null,
-    });
-
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing or invalid fields. Could not create teacher.',
-        };
+export async function updateStudent(
+    student: {
+        id: string;
+        firstname: string;
+        lastname: string;
+        email: string;
+        grade: string;
+        dateofbirth?: string | null;
+        address?: string | null;
+        phonenumber?: string | null;
+        enrollmentdate?: string | null;
+        parentscontact?: string | null;
+        notes?: string | null;
     }
-
-    const {
-        firstname,
-        lastname,
-        email,
-        subject,
-        phonenumber,
-        address,
-        hiredate,
-        qualification,
-        bio,
-        avatarurl,
-    } = validatedFields.data;
-
-    const safefirstname = firstname ?? null;
-    const safelastname = lastname ?? null;
-    const safeemail = email ?? null;
-    const safesubject = subject ?? null;
-    const safephonenumber = phonenumber ?? null;
-    const safeaddress = address ?? null;
-    const safehiredate = hiredate ?? null;
-    const safequalification = qualification ?? null;
-    const safebio = bio ?? null;
-    const safeavatarurl = avatarurl ?? null;
-
-    try {
-        await sql`
-            INSERT INTO teachers (
-                firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio, avatarurl
-            ) VALUES (
-                ${safefirstname}, ${safelastname}, ${safeemail}, ${safesubject}, ${safephonenumber}, ${safeaddress}, ${safehiredate}, ${safequalification}, ${safebio}, ${safeavatarurl}
-            )
-        `;
-    } catch {
-        return {
-            message: 'Database error: Could not create teacher.',
-        };
-    }
-    redirect('/dashboard/Teachers');
-}
-
-export async function updateStudent(prevState: StudentState, formData: FormData) {
-    const validatedFields = StudentFormSchema.safeParse({
-        id: formData.get('id'),
-        firstname: formData.get('firstname'),
-        lastname: formData.get('lastname'),
-        email: formData.get('email'),
-        grade: formData.get('grade'),
-        dateofbirth: formData.get('dateofbirth') || null,
-        address: formData.get('address') || null,
-        phonenumber: formData.get('phonenumber') || null,
-        enrollmentdate: formData.get('enrollmentdate') || null,
-        parentscontact: formData.get('parentscontact') || null,
-        notes: formData.get('notes'),
-        avatarUrl: formData.get('avatarUrl') || null,
-    });
+) {
+    const validatedFields = StudentFormSchema.safeParse(student);
 
     if (!validatedFields.success) {
         return {
@@ -240,158 +106,201 @@ export async function updateStudent(prevState: StudentState, formData: FormData)
         };
     }
 
-    const {
-        id,
-        firstname,
-        lastname,
-        email,
-        grade,
-        dateofbirth,
-        address,
-        phonenumber,
-        enrollmentdate,
-        parentscontact,
-        notes,
-        avatarurl,
+    const { id, firstname, lastname, email, grade, dateofbirth, address, phonenumber, enrollmentdate, parentscontact, notes,
     } = validatedFields.data;
 
-    const safeId = id ?? null;
-    const safeFirstname = firstname ?? null;
-    const safeLastname = lastname ?? null;
-    const safeEmail = email ?? null;
-    const safeGrade = grade ?? null;
-    const safeDateofbirth = dateofbirth ?? null;
-    const safeAddress = address ?? null;
-    const safePhonenumber = phonenumber ?? null;
-    const safeEnrollmentdate = enrollmentdate ?? null;
-    const safeParentscontact = parentscontact ?? null;
-    const safeNotes = notes ?? null;
-    const safeAvatarurl = avatarurl ?? null;
 
     try {
         await sql`
             UPDATE students SET
-                firstname = ${safeFirstname},
-                lastname = ${safeLastname},
-                email = ${safeEmail},
-                grade = ${safeGrade},
-                dateofbirth = ${safeDateofbirth},
-                address = ${safeAddress},
-                phonenumber = ${safePhonenumber},
-                enrollmentdate = ${safeEnrollmentdate},
-                parentscontact = ${safeParentscontact},
-                notes = ${safeNotes},
-                avatarurl = ${safeAvatarurl}
-            WHERE id = ${safeId}
-        `;
-
-    } catch {
-        return {
-            message: 'Database error: Could not update student.',
-        };
-    }
-    redirect('/dashboard/Students');
-}
-
-export async function updateTeacher(prevState: TeacherState, formData: FormData) {
-    const TeacherFormSchemaWithId = z.object({
-        id: z.string(),
-        firstname: z.string({
-            required_error: 'First name is required.',
-        }).min(1, { message: 'First name cannot be empty.' }),
-        lastname: z.string({
-            required_error: 'Last name is required.',
-        }).min(1, { message: 'Last name cannot be empty.' }),
-        email: z.string({
-            required_error: 'Email is required.',
-        }).email({ message: 'Invalid email address.' }),
-        subject: z.string({
-            required_error: 'Subject is required.',
-        }).min(1, { message: 'Subject cannot be empty.' }),
-        phonenumber: z.string().nullable().optional(),
-        address: z.string().nullable().optional(),
-        hiredate: z.string().nullable().optional(),
-        qualification: z.string().nullable().optional(),
-        bio: z.string().nullable().optional(),
-        avatarurl: z.string().nullable().optional(),
-    });
-
-    const validatedFields = TeacherFormSchemaWithId.safeParse({
-        id: formData.get('id'),
-        firstname: formData.get('firstname'),
-        lastname: formData.get('lastname'),
-        email: formData.get('email'),
-        subject: formData.get('subject'),
-        phonenumber: formData.get('phonenumber') || null,
-        address: formData.get('address') || null,
-        hiredate: formData.get('hiredate') || null,
-        qualification: formData.get('qualification') || null,
-        bio: formData.get('bio') || null,
-        avatarurl: formData.get('avatarurl') || null,
-    });
-
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing or invalid fields. Could not update teacher.',
-        };
-    }
-
-    const {
-        id,
-        firstname,
-        lastname,
-        email,
-        subject,
-        phonenumber,
-        address,
-        hiredate,
-        qualification,
-        bio,
-        avatarurl,
-    } = validatedFields.data;
-    try {
-        await sql`
-            UPDATE teachers SET
                 firstname = ${firstname},
                 lastname = ${lastname},
                 email = ${email},
-                subject = ${subject},
-                phonenumber = ${phonenumber ?? null},
+                grade = ${grade},
+                dateofbirth = ${dateofbirth ?? null},
                 address = ${address ?? null},
-                hiredate = ${hiredate ?? null},
-                qualification = ${qualification ?? null},
-                bio = ${bio ?? null},
-                avatarurl = ${avatarurl ?? null}
+                phonenumber = ${phonenumber ?? null},
+                enrollmentdate = ${enrollmentdate ?? null},
+                parentscontact = ${parentscontact ?? null},
+                notes = ${notes ?? null}
             WHERE id = ${id}
         `;
-
-    } catch {
+        revalidatePath('/dashboard/Students');
+        return { success: true };
+    } catch (error: any) { 
         return {
-            message: 'Database error: Could not update teacher.',
+            message: 'Database error: Could not update student.',
+            error: error?.message,
         };
     }
-    redirect('/dashboard/Teachers');
 }
 
 export async function deleteStudent(id: string) {
-    try {
-        await sql`DELETE FROM students WHERE id = ${id}`;
-    } catch {
-        return {
-            message: 'Database error: Could not delete student.',
-        };
+  try {
+    const result = await sql`DELETE FROM students WHERE id = ${id}`;
+    if (result.count === 0) {
+      return { message: 'Student not found.' };
     }
-    revalidatePath('/dashboard/Students');
+    return { message: 'Student deleted successfully.' };
+  } catch (error) {
+    return {
+      message: 'Database error: Could not delete student.',
+      error: (error as Error).message,
+    };
+  }
+}
+
+//Teacher Actions
+const TeacherFormSchema = z.object({
+    id: z.string().optional(),
+    firstname: z.string().min(1, { message: 'First name cannot be empty.' }),
+    lastname: z.string().min(1, { message: 'Last name cannot be empty.' }),
+    email: z.string().email({ message: 'Invalid email address.' }),
+    subject: z.string().min(1, { message: 'Subject cannot be empty.' }),
+    phonenumber: z.string().nullable().optional(),
+    address: z.string().nullable().optional(),
+    hiredate: z.string().nullable().optional(),
+    qualification: z.string().nullable().optional(),
+    bio: z.string().nullable().optional(),
+    avatarurl: z.string().nullable().optional(),
+});
+
+const CreateTeacher = TeacherFormSchema.omit({ id: true });
+export type TeacherState = {
+    id?: string;
+    firstname?: string;
+    lastname?: string;
+    email?: string;
+    subject?: string;
+    phonenumber?: string | null;
+    address?: string | null;
+    hiredate?: string | null;
+    qualification?: string | null;
+    bio?: string | null;
+    avatarurl?: string | null;
+    errors?: {
+        firstname?: string[];
+        lastname?: string[];
+        email?: string[];
+        subject?: string[];
+        phonenumber?: string[];
+        address?: string[];
+        hiredate?: string[];
+        qualification?: string[];
+        bio?: string[];
+        avatarurl?: string[];
+    };
+    message?: string | null;
+};
+
+export async function createTeacher(jsonData: any): Promise<TeacherState> {
+  console.log('Received data:', jsonData);
+  const validation = CreateTeacher.safeParse({
+    firstname: jsonData.firstname ?? null,
+    lastname: jsonData.lastname ?? null,
+    email: jsonData.email ?? null,
+    subject: jsonData.subject ?? null,
+    phonenumber: jsonData.phonenumber ?? null,
+    address: jsonData.address ?? null,
+    hiredate: jsonData.hiredate ?? null,
+    qualification: jsonData.qualification ?? null,
+    bio: jsonData.bio ?? null,
+    avatarurl: jsonData.avatarurl ?? null,
+  });
+
+  if (!validation.success) {
+    return {
+      errors: validation.error.flatten().fieldErrors,
+      message: 'Missing or invalid fields. Could not create teacher.',
+    };
+  }
+
+  const {
+    firstname, lastname, email, subject, phonenumber, address,
+    hiredate, qualification, bio, avatarurl,
+  } = validation.data;
+
+  try {
+    
+    const result = await sql`
+      INSERT INTO teachers (
+        firstname, lastname, email, subject, phonenumber,
+        address, hiredate, qualification, bio, avatarurl
+      ) VALUES (
+        ${firstname}, ${lastname}, ${email}, ${subject}, ${phonenumber ?? null},
+        ${address ?? null}, ${hiredate ?? null}, ${qualification ?? null}, ${bio ?? null}, ${avatarurl ?? null}
+      )
+    `;
+
+  } catch (error) {
+    console.error('SQL Error:', error);
+    return {
+      message: 'Database error: Could not create teacher.',
+      errors: {},
+    };
+  }
+}
+
+export async function updateTeacher(
+  teacher: {
+    id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    subject: string;
+    phonenumber?: string | null;
+    address?: string | null;
+    hiredate?: string | null;
+    qualification?: string | null;
+    bio?: string | null;
+  }
+) {
+  const validatedFields = TeacherFormSchema.safeParse(teacher);
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing or invalid fields. Could not update teacher.',
+    };
+  }
+
+  const { id, firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio } = validatedFields.data;
+
+  try {
+    await sql`
+      UPDATE teachers SET
+        firstname = ${firstname},
+        lastname = ${lastname},
+        email = ${email},
+        subject = ${subject},
+        phonenumber = ${phonenumber ?? null},
+        address = ${address ?? null},
+        hiredate = ${hiredate ?? null},
+        qualification = ${qualification ?? null},
+        bio = ${bio ?? null}
+      WHERE id = ${id}
+    `;
+    revalidatePath('/dashboard/Teachers');
+    return { success: true };
+  } catch (error: any) {
+    return {
+      message: 'Database error: Could not update teacher.',
+      error: error?.message,
+    };
+  }
 }
 
 export async function deleteTeacher(id: string) {
-    try {
-        await sql`DELETE FROM teachers WHERE id = ${id}`;
-    } catch {
-        return {
-            message: 'Database error: Could not delete teacher.',
-        };
+  try {
+    const result = await sql`DELETE FROM teachers WHERE id = ${id}`;
+    if (result.count === 0) {
+      return { message: 'Teacher not found.' };
     }
-    revalidatePath('/dashboard/Teachers');
+    return { message: 'Teacher deleted successfully.' };
+  } catch (error) {
+    return {
+      message: 'Database error: Could not delete teacher.',
+      error: (error as Error).message,
+    };
+  }
 }

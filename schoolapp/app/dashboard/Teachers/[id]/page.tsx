@@ -138,8 +138,24 @@ export default function TeacherDetailPage() {
         <Button variant="primary" onClick={() => router.push(`/dashboard/Teachers/${teacher.id}/edit`)}>
           Edit 
         </Button>
-        <Button variant="danger" onClick={() => alert('Delete logic for teacher: ' + teacher.id)}>
-          Delete 
+        <Button
+          variant="danger"
+          className="bg-red-600 hover:bg-red-700"
+          onClick={async () => {
+            if (confirm(`Are you sure you want to delete ${teacher.firstname}?`)) {
+              const res = await fetch(`/api/teachers/${teacher.id}`, { method: 'DELETE' });
+
+              if (res.ok) {
+          alert('Teacher deleted successfully.');
+          router.push('/dashboard/Teachers');
+              } else {
+          const errorData = await res.json();
+          alert(`Error: ${errorData.error}`);
+              }
+            }
+          }}
+        >
+          Delete
         </Button>
       </div>
     </div>
