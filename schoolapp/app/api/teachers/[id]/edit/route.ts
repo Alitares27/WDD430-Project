@@ -16,11 +16,8 @@ export async function PUT(
         if (teacherIndex === -1) {
             return NextResponse.json({ error: 'Teacher not found.' }, { status: 404 });
         }
-
         const updatedTeacher = { ...teachers[teacherIndex], ...body };
-
         await updateTeacher(updatedTeacher);
-
         return NextResponse.json(updatedTeacher);
     } catch  {
         return NextResponse.json({ error: 'Failed to update teacher.' }, { status: 500 });

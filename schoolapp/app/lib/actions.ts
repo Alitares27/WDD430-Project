@@ -74,8 +74,7 @@ export async function createStudent(jsonData: any): Promise<StudentState> {
             )
         `;
         return { message: 'Student created successfully.' };
-    } catch (error) {
-        console.error('SQL Error:', error);
+    } catch {
         return {
             message: 'Database error: Could not create student.',
         };
@@ -127,10 +126,10 @@ export async function updateStudent(
         `;
         revalidatePath('/dashboard/Students');
         return { success: true };
-    } catch (error: any) { 
+    } catch  { 
         return {
             message: 'Database error: Could not update student.',
-            error: error?.message,
+            
         };
     }
 }
@@ -142,10 +141,9 @@ export async function deleteStudent(id: string) {
       return { message: 'Student not found.' };
     }
     return { message: 'Student deleted successfully.' };
-  } catch (error) {
+  } catch  {
     return {
       message: 'Database error: Could not delete student.',
-      error: (error as Error).message,
     };
   }
 }
@@ -229,11 +227,10 @@ export async function createTeacher(jsonData: any): Promise<TeacherState> {
         `;
 
     return { message: 'Teacher created successfully.' };
-  } catch (error) {
-    console.error('SQL Error:', error);
+  } catch {
     return {
       message: 'Database error: Could not create teacher.',
-      errors: {},
+      
     };
   }
 }
@@ -279,10 +276,10 @@ export async function updateTeacher(
     `;
     revalidatePath('/dashboard/Teachers');
     return { success: true };
-  } catch (error: any) {
+  } catch  {
     return {
       message: 'Database error: Could not update teacher.',
-      error: error?.message,
+     
     };
   }
 }
@@ -294,10 +291,9 @@ export async function deleteTeacher(id: string) {
       return { message: 'Teacher not found.' };
     }
     return { message: 'Teacher deleted successfully.' };
-  } catch (error) {
+  } catch {
     return {
       message: 'Database error: Could not delete teacher.',
-      error: (error as Error).message,
     };
   }
 }

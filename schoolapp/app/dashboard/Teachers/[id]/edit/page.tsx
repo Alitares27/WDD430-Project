@@ -59,9 +59,9 @@ export default function EditTeacherPage() {
         setQualification(data.qualification || '');
         setBio(data.bio || '');
         setAvatarurl(data.avatarurl || '');
-      } catch (_err: unknown) {
-        if (_err instanceof Error) {
-          setFetchError(_err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setFetchError(err.message);
         } else {
           setFetchError('Error loading teacher data for editing.');
         }

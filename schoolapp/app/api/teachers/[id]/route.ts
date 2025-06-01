@@ -83,7 +83,7 @@ export async function PUT(
         }
 
         return NextResponse.json({ message: 'Teacher updated successfully', teacher: result });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to update teacher.' }, { status: 500 });
     }
 }
@@ -102,7 +102,7 @@ export async function DELETE(
         }
 
         return NextResponse.json({ message: 'Teacher deleted successfully' });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to delete teacher.' }, { status: 500 });
     }
 }
