@@ -85,7 +85,6 @@ export async function PUT(
     if (result.errors) {
        return NextResponse.json({ errors: result.errors, message: result.message }, { status: 400 });
     }
-
     return NextResponse.json({ message: 'Student updated successfully', student: result });
   } catch {
     return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
