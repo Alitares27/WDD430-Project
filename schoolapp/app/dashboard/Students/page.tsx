@@ -51,7 +51,7 @@ export default function Page() {
   };
 
   const handleEdit = (id: string) => {
-    alert(`Edit student with ID: ${id}`);
+    alert(`Are you sure you want to edit student?`);
     router.push(`/dashboard/Students/${id}/edit`);
   };
 

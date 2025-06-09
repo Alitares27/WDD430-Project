@@ -1,16 +1,16 @@
-'use server';
-import postgres from 'postgres';
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
+"use server";
+import postgres from "postgres";
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 const StudentFormSchema = z.object({
   id: z.string().optional(),
-  firstname: z.string().min(1, { message: 'First name cannot be empty.' }),
-  lastname: z.string().min(1, { message: 'Last name cannot be empty.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  grade: z.string().min(1, { message: 'Grade cannot be empty.' }),
+  firstname: z.string().min(1, { message: "First name cannot be empty." }),
+  lastname: z.string().min(1, { message: "Last name cannot be empty." }),
+  email: z.string().email({ message: "Invalid email address." }),
+  grade: z.string().min(1, { message: "Grade cannot be empty." }),
   dateofbirth: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   phonenumber: z.string().nullable().optional(),
@@ -41,15 +41,15 @@ export type StudentState = {
 
 export async function createStudent(jsonData: unknown): Promise<StudentState> {
   function isStudentInput(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' && obj !== null;
+    return typeof obj === "object" && obj !== null;
   }
 
   if (!isStudentInput(jsonData)) {
     return {
       errors: {
-        firstname: ['Invalid input data.'],
+        firstname: ["Invalid input data."],
       },
-      message: 'Invalid input data. Could not create student.',
+      message: "Invalid input data. Could not create student.",
     };
   }
 
@@ -70,12 +70,22 @@ export async function createStudent(jsonData: unknown): Promise<StudentState> {
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing or invalid fields. Could not create student.',
+      message: "Missing or invalid fields. Could not create student.",
     };
   }
 
   const {
-    firstname, lastname, email, grade, dateofbirth, address, phonenumber, enrollmentdate, parentscontact, notes, avatarurl,
+    firstname,
+    lastname,
+    email,
+    grade,
+    dateofbirth,
+    address,
+    phonenumber,
+    enrollmentdate,
+    parentscontact,
+    notes,
+    avatarurl,
   } = validatedFields.data;
 
   try {
@@ -83,80 +93,91 @@ export async function createStudent(jsonData: unknown): Promise<StudentState> {
             INSERT INTO students (
                 firstname, lastname, email, grade, dateofbirth, address, phonenumber, enrollmentdate, parentscontact, notes, avatarurl
             ) VALUES (
-                ${firstname}, ${lastname}, ${email}, ${grade}, ${dateofbirth ?? null}, ${address ?? null}, ${phonenumber ?? null}, ${enrollmentdate ?? null}, ${parentscontact ?? null}, ${notes ?? null}, ${avatarurl ?? null}
+                ${firstname}, ${lastname}, ${email}, ${grade}, ${dateofbirth ?? null
+      }, ${address ?? null}, ${phonenumber ?? null}, ${enrollmentdate ?? null}, ${parentscontact ?? null
+      }, ${notes ?? null}, ${avatarurl ?? null}
             )
         `;
-    return { message: 'Student created successfully.' };
+    return { message: "Student created successfully." };
   } catch {
     return {
-      message: 'Database error: Could not create student.',
+      message: "Database error: Could not create student.",
     };
   }
 }
 
-export async function updateStudent(
-  student: {
-    id: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    grade: string;
-    dateofbirth?: string | null;
-    address?: string | null;
-    phonenumber?: string | null;
-    enrollmentdate?: string | null;
-    parentscontact?: string | null;
-    notes?: string | null;
-  }
-) {
+export async function updateStudent(student: {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  grade: string;
+  dateofbirth?: string;
+  address: string;
+  phonenumber: string;
+  enrollmentdate: string;
+  parentscontact: string;
+  notes?: string | null;
+}) {
   const validatedFields = StudentFormSchema.safeParse(student);
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing or invalid fields. Could not update student.',
+      message: "Missing or invalid fields. Could not update student.",
     };
   }
 
-  const { id, firstname, lastname, email, grade, dateofbirth, address, phonenumber, enrollmentdate, parentscontact, notes,
+  const {
+    id,
+    firstname,
+    lastname,
+    email,
+    grade,
+    dateofbirth = null,
+    address,
+    phonenumber,
+    enrollmentdate,
+    parentscontact,
+    notes,
   } = validatedFields.data;
 
+  const safeNotes = notes ?? null;
 
-  try {
-    await sql`
-            UPDATE students SET
-                firstname = ${firstname},
-                lastname = ${lastname},
-                email = ${email},
-                grade = ${grade},
-                dateofbirth = ${dateofbirth ?? null},
-                address = ${address ?? null},
-                phonenumber = ${phonenumber ?? null},
-                enrollmentdate = ${enrollmentdate ?? null},
-                parentscontact = ${parentscontact ?? null},
-                notes = ${notes ?? null}
-            WHERE id = ${id}
-        `;
-    revalidatePath('/dashboard/Students');
-    return { success: true };
-  } catch {
-    return {
-      message: 'Database error: Could not update student.',
-
-    };
-  }
+ try {
+  await sql`
+    UPDATE students SET
+      firstname = ${firstname ?? null},
+      lastname = ${lastname ?? null},
+      email = ${email ?? null},
+      grade = ${grade ?? null},
+      dateofbirth = ${dateofbirth ?? null},
+      address = ${address ?? null},
+      phonenumber = ${phonenumber ?? null},
+      enrollmentdate = ${enrollmentdate ?? null},
+      parentscontact = ${parentscontact ?? null},
+      notes = ${safeNotes ?? null}
+    WHERE id = ${id ?? null}
+  `;
+  revalidatePath("/dashboard/Students");
+  return { success: true };
+} catch {
+  return {
+    message: "Database error: Could not update student.",
+  };
+}
 }
 
 export async function deleteStudent(id: string) {
   try {
     const result = await sql`DELETE FROM students WHERE id = ${id}`;
     if (result.count === 0) {
-      return { message: 'Student not found.' };
+      return { message: "Student not found." };
     }
-    return { message: 'Student deleted successfully.' };
+    return { message: "Student deleted successfully." };
   } catch {
     return {
-      message: 'Database error: Could not delete student.',
+      message: "Database error: Could not delete student.",
     };
   }
 }
@@ -164,10 +185,10 @@ export async function deleteStudent(id: string) {
 //Teacher Actions
 const TeacherFormSchema = z.object({
   id: z.string().optional(),
-  firstname: z.string().min(1, { message: 'First name cannot be empty.' }),
-  lastname: z.string().min(1, { message: 'Last name cannot be empty.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  subject: z.string().min(1, { message: 'Subject cannot be empty.' }),
+  firstname: z.string().min(1, { message: "First name cannot be empty." }),
+  lastname: z.string().min(1, { message: "Last name cannot be empty." }),
+  email: z.string().email({ message: "Invalid email address." }),
+  subject: z.string().min(1, { message: "Subject cannot be empty." }),
   phonenumber: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   hiredate: z.string().nullable().optional(),
@@ -206,15 +227,15 @@ export type TeacherState = {
 
 export async function createTeacher(jsonData: unknown): Promise<TeacherState> {
   function isTeacherInput(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' && obj !== null;
+    return typeof obj === "object" && obj !== null;
   }
 
   if (!isTeacherInput(jsonData)) {
     return {
       errors: {
-        firstname: ['Invalid input data.'],
+        firstname: ["Invalid input data."],
       },
-      message: 'Invalid input data. Could not create teacher.',
+      message: "Invalid input data. Could not create teacher.",
     };
   }
 
@@ -234,12 +255,21 @@ export async function createTeacher(jsonData: unknown): Promise<TeacherState> {
   if (!validation.success) {
     return {
       errors: validation.error.flatten().fieldErrors,
-      message: 'Missing or invalid fields. Could not create teacher.',
+      message: "Missing or invalid fields. Could not create teacher.",
     };
   }
 
   const {
-    firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio, avatarurl,
+    firstname,
+    lastname,
+    email,
+    subject,
+    phonenumber,
+    address,
+    hiredate,
+    qualification,
+    bio,
+    avatarurl,
   } = validation.data;
 
   try {
@@ -247,42 +277,53 @@ export async function createTeacher(jsonData: unknown): Promise<TeacherState> {
             INSERT INTO teachers (
                 firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio, avatarurl
             ) VALUES (
-                ${firstname}, ${lastname}, ${email}, ${subject}, ${phonenumber ?? null}, ${address ?? null}, ${hiredate ?? null}, ${qualification ?? null}, ${bio ?? null}, ${avatarurl ?? null}
+                ${firstname}, ${lastname}, ${email}, ${subject}, ${phonenumber ?? null
+      }, ${address ?? null}, ${hiredate ?? null}, ${qualification ?? null}, ${bio ?? null
+      }, ${avatarurl ?? null}
             )
         `;
 
-    return { message: 'Teacher created successfully.' };
+    return { message: "Teacher created successfully." };
   } catch {
     return {
-      message: 'Database error: Could not create teacher.',
+      message: "Database error: Could not create teacher.",
     };
   }
 }
 
-export async function updateTeacher(
-  teacher: {
-    id: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    subject: string;
-    phonenumber?: string | null;
-    address?: string | null;
-    hiredate?: string | null;
-    qualification?: string | null;
-    bio?: string | null;
-  }
-) {
+export async function updateTeacher(teacher: {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  subject: string;
+  phonenumber?: string | null;
+  address?: string | null;
+  hiredate?: string | null;
+  qualification?: string | null;
+  bio?: string | null;
+}) {
   const validatedFields = TeacherFormSchema.safeParse(teacher);
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing or invalid fields. Could not update teacher.',
+      message: "Missing or invalid fields. Could not update teacher.",
     };
   }
 
-  const { id, firstname, lastname, email, subject, phonenumber, address, hiredate, qualification, bio } = validatedFields.data;
+  const {
+    id,
+    firstname,
+    lastname,
+    email,
+    subject,
+    phonenumber,
+    address,
+    hiredate,
+    qualification,
+    bio,
+  } = validatedFields.data;
 
   try {
     await sql`
@@ -298,12 +339,11 @@ export async function updateTeacher(
         bio = ${bio ?? null}
       WHERE id = ${id}
     `;
-    revalidatePath('/dashboard/Teachers');
+    revalidatePath("/dashboard/Teachers");
     return { success: true };
   } catch {
     return {
-      message: 'Database error: Could not update teacher.',
-
+      message: "Database error: Could not update teacher.",
     };
   }
 }
@@ -312,12 +352,12 @@ export async function deleteTeacher(id: string) {
   try {
     const result = await sql`DELETE FROM teachers WHERE id = ${id}`;
     if (result.count === 0) {
-      return { message: 'Teacher not found.' };
+      return { message: "Teacher not found." };
     }
-    return { message: 'Teacher deleted successfully.' };
+    return { message: "Teacher deleted successfully." };
   } catch {
     return {
-      message: 'Database error: Could not delete teacher.',
+      message: "Database error: Could not delete teacher.",
     };
   }
 }
@@ -325,13 +365,15 @@ export async function deleteTeacher(id: string) {
 // Course Actions
 const CourseFormSchema = z.object({
   id: z.string(),
-  title: z.string().min(1, { message: 'Title cannot be empty.' }),
-  course_code: z.string().min(1, { message: 'Course Code cannot be empty.' }),
-  description: z.string().min(1, { message: 'brief description' }),
-  credits: z.number().min(1, { message: 'Credits must be at least 1.' }),
-  duration: z.string().min(1, { message: 'Duration cannot be empty.' }),
-  difficulty_level: z.string().min(1, { message: 'Difficulty Level cannot be empty.' }),
-  teacher_email: z.string().email({ message: 'Invalid email address.' }),
+  title: z.string().min(1, { message: "Title cannot be empty." }),
+  course_code: z.string().min(1, { message: "Course Code cannot be empty." }),
+  description: z.string().min(1, { message: "brief description" }),
+  credits: z.number().min(1, { message: "Credits must be at least 1." }),
+  duration: z.string().min(1, { message: "Duration cannot be empty." }),
+  difficulty_level: z
+    .string()
+    .min(1, { message: "Difficulty Level cannot be empty." }),
+  teacher_email: z.string().email({ message: "Invalid email address." }),
 });
 
 const CreateCourse = CourseFormSchema.omit({ id: true });
@@ -355,19 +397,19 @@ export type CourseState = {
     teacher_email?: string[];
   };
   message?: string | null;
-};          
+};
 
 export async function createCourse(jsonData: unknown): Promise<CourseState> {
   function isCourseInput(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' && obj !== null;
+    return typeof obj === "object" && obj !== null;
   }
 
   if (!isCourseInput(jsonData)) {
     return {
       errors: {
-        title: ['Invalid input data.'],
+        title: ["Invalid input data."],
       },
-      message: 'Invalid input data. Could not create course.',
+      message: "Invalid input data. Could not create course.",
     };
   }
 
@@ -382,14 +424,22 @@ export async function createCourse(jsonData: unknown): Promise<CourseState> {
   });
 
   if (!validation.success) {
-    console.log('Validation errors:', validation.error.flatten().fieldErrors);
+    console.log("Validation errors:", validation.error.flatten().fieldErrors);
     return {
       errors: validation.error.flatten().fieldErrors,
-      message: 'Missing or invalid fields. Could not create course.',
+      message: "Missing or invalid fields. Could not create course.",
     };
   }
 
-  const { title, course_code, description, credits, duration, difficulty_level, teacher_email } = validation.data;
+  const {
+    title,
+    course_code,
+    description,
+    credits,
+    duration,
+    difficulty_level,
+    teacher_email,
+  } = validation.data;
 
   try {
     await sql`
@@ -400,39 +450,48 @@ export async function createCourse(jsonData: unknown): Promise<CourseState> {
       )
     `;
 
-    return { message: 'Course created successfully.' };
+    return { message: "Course created successfully." };
   } catch (error) {
-    console.error('Database error:', error);
+    console.error("Database error:", error);
     return {
-      message: 'Database error: Could not create course.',
+      message: "Database error: Could not create course.",
     };
   }
 }
 
-
-export async function updateCourse(
-  course: {
-    id: string;
-    title: string;
-    course_code: string;
-    description: string;
-    credits: number;
-    duration: string;
-    difficulty_level: string;
-    teacher_email: string;
-  }
-) {
+export async function updateCourse(course: {
+  id: string;
+  title: string;
+  course_code: string;
+  description: string;
+  credits: number;
+  duration: string;
+  difficulty_level: string;
+  teacher_email: string;
+}) {
   const validatedFields = CourseFormSchema.safeParse(course);
 
   if (!validatedFields.success) {
-    console.error('Validation failed:', validatedFields.error.flatten().fieldErrors);
+    console.error(
+      "Validation failed:",
+      validatedFields.error.flatten().fieldErrors
+    );
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing or invalid fields. Could not update course.',
+      message: "Missing or invalid fields. Could not update course.",
     };
   }
 
-  const { id, title, course_code, description, credits, duration, difficulty_level, teacher_email } = validatedFields.data;
+  const {
+    id,
+    title,
+    course_code,
+    description,
+    credits,
+    duration,
+    difficulty_level,
+    teacher_email,
+  } = validatedFields.data;
 
   try {
     const result = await sql`
@@ -447,14 +506,14 @@ export async function updateCourse(
       WHERE id = ${id}
       RETURNING *
     `;
-    revalidatePath('/dashboard/Courses');
+    revalidatePath("/dashboard/Courses");
     if (result.length === 0) {
-      console.error('No course found with id:', id);
+      console.error("No course found with id:", id);
       return null;
     }
     return result[0];
   } catch (error) {
-    console.error('SQL error:', error);
+    console.error("SQL error:", error);
     return null;
   }
 }
@@ -463,12 +522,12 @@ export async function deleteCourse(id: string) {
   try {
     const result = await sql`DELETE FROM courses WHERE id = ${id}`;
     if (result.count === 0) {
-      return { message: 'Course not found.' };
+      return { message: "Course not found." };
     }
-    return { message: 'Course deleted successfully.' };
+    return { message: "Course deleted successfully." };
   } catch {
     return {
-      message: 'Database error: Could not delete course.',
+      message: "Database error: Could not delete course.",
     };
   }
 }
