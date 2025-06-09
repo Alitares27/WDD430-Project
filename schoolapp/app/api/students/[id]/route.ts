@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { getStudents } from '@/app/lib/data';
 import { updateStudent, deleteStudent } from '@/app/lib/actions';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    const { id } = params;
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop(); 
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
     const students = await getStudents();
 
     function isStudent(obj: unknown): obj is { id: string | number } {
@@ -19,20 +22,23 @@ export async function GET(
     if (!student) {
       return NextResponse.json({ error: 'Student not found.' }, { status: 404 });
     }
+
     return NextResponse.json(student);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch student.' }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request) {
   try {
-    const { id } = params;
-    const body = await request.json();
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop();
 
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
+    const body = await request.json();
     const {
       firstname,
       lastname,
@@ -89,20 +95,23 @@ export async function PUT(
     const result = await updateStudent({ id, ...body });
 
     if (result.errors) {
-       return NextResponse.json({ errors: result.errors, message: result.message }, { status: 400 });
+      return NextResponse.json({ errors: result.errors, message: result.message }, { status: 400 });
     }
+
     return NextResponse.json({ message: 'Student updated successfully', student: result });
   } catch {
     return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
-    const { id } = params;
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop();
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
 
     const result = await deleteStudent(id);
 
