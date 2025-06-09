@@ -90,7 +90,7 @@ export default function Page() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Courses</h1>
-      <div className="mb-4 flex items-center gap-2">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <Input
         id='search'
           type="text"
