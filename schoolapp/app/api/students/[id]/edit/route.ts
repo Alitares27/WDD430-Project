@@ -6,7 +6,7 @@ import type { Student } from '@/app/lib/definitions';
 export async function PUT(request: Request) {
     try {
         const url = new URL(request.url);
-        const id = url.pathname.split("/").pop(); 
+        const id = url.pathname.split("/").pop();
 
         if (!id) {
             return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -21,8 +21,16 @@ export async function PUT(request: Request) {
         }
 
         const updatedStudent: Student = { ...students[studentIndex], ...body };
-        await updateStudent(updatedStudent);
-        return NextResponse.json(updatedStudent);
+
+        const safeUpdatedStudent = {
+            ...updatedStudent,
+            address: updatedStudent.address ?? "",
+            phonenumber: updatedStudent.phonenumber ?? "",
+            enrollmentdate: updatedStudent.enrollmentdate ?? "",
+            parentscontact: updatedStudent.parentscontact ?? "",
+        };
+        await updateStudent(safeUpdatedStudent);
+        return NextResponse.json(safeUpdatedStudent);
     } catch {
         return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
     }

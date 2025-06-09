@@ -112,7 +112,7 @@ export async function updateStudent(student: {
   lastname: string;
   email: string;
   grade: string;
-  dateofbirth?: string;
+   dateofbirth?: string | null;
   address: string;
   phonenumber: string;
   enrollmentdate: string;
@@ -326,18 +326,18 @@ export async function updateTeacher(teacher: {
   } = validatedFields.data;
 
   try {
-    await sql`
-      UPDATE teachers SET
-        firstname = ${firstname},
-        lastname = ${lastname},
-        email = ${email},
-        subject = ${subject},
-        phonenumber = ${phonenumber ?? null},
-        address = ${address ?? null},
-        hiredate = ${hiredate ?? null},
-        qualification = ${qualification ?? null},
-        bio = ${bio ?? null}
-      WHERE id = ${id}
+await sql`
+  UPDATE teachers SET
+    firstname = ${firstname ?? null},
+    lastname = ${lastname ?? null},
+    email = ${email ?? null},
+    subject = ${subject ?? null},
+    phonenumber = ${phonenumber ?? null},
+    address = ${address ?? null},
+    hiredate = ${hiredate ?? null},
+    qualification = ${qualification ?? null},
+    bio = ${bio ?? null}
+  WHERE id = ${id ?? null}
     `;
     revalidatePath("/dashboard/Teachers");
     return { success: true };
