@@ -4,7 +4,6 @@ import Input from '../../ui/Input';
 import Button from '@/app/ui/button';
 import CourseCard from '@/app/ui/courses/courseCard'; 
 import { useRouter } from 'next/navigation';
-import { title } from 'process';
 
 export default function Page() {
   const router = useRouter();
