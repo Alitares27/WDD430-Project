@@ -53,7 +53,7 @@ export default function Page() {
   };
 
  const handleDelete = async (id: string) => {
-  if (window.confirm(`Are you sure you want to delete course ${id}?`)) {
+  if (window.confirm(`Are you sure you want to delete course?`)) {
     try {
       const res = await fetch(`/api/courses/${id}`, {
         method: 'DELETE',
@@ -61,7 +61,7 @@ export default function Page() {
 
       if (res.ok) {
         setCourses(courses.filter(course => course.id !== id));
-        alert(`Course ${id} deleted successfully.`);
+        alert(`Course deleted successfully.`);
         router.push('/dashboard/Courses');
       } else {
         let errorMessage = 'Unknown error';

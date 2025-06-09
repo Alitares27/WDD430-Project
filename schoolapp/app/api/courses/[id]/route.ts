@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { getCourses } from '@/app/lib/data';
 import { updateCourse, deleteCourse } from '@/app/lib/actions';
 
-export async function GET(
-  request: Request,
-  context: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    const { id } = await context.params;
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop(); // Extrae el ID desde la URL
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
     const courses = await getCourses();
 
     function isCourse(obj: unknown): obj is { id: string | number } {
@@ -19,11 +22,13 @@ export async function GET(
     if (!course) {
       return NextResponse.json({ error: 'Course not found.' }, { status: 404 });
     }
+
     return NextResponse.json(course);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch course.' }, { status: 500 });
   }
 }
+
 
 export async function PUT(
   request: Request,

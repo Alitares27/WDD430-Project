@@ -77,7 +77,6 @@ export default function Page() {
   }
 };
 
-
   const handleAddNewStudent = () => {
     router.push('/dashboard/Students/Create');
   };
