@@ -32,7 +32,6 @@ export async function getTeachers() {
   }
 }
 
-// data.ts
 export async function getCourses() {
   try {
     const courses = await sql<Course[]>`

@@ -358,7 +358,6 @@ export type CourseState = {
 };          
 
 export async function createCourse(jsonData: unknown): Promise<CourseState> {
-  // Type guard to ensure jsonData is an object
   function isCourseInput(obj: unknown): obj is Record<string, unknown> {
     return typeof obj === 'object' && obj !== null;
   }

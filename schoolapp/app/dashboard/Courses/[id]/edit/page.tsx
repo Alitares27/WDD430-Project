@@ -96,7 +96,6 @@ const handleSubmit = async (e: React.FormEvent) => {
 
             if (!res.ok) {
                 const errorData = await res.json();
-                // Si el backend devuelve errores de campos, los mostramos
                 if (errorData.errors) {
                     const fieldErrors: { [key: string]: string } = {};
                     for (const key in errorData.errors) {

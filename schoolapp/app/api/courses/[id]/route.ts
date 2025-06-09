@@ -5,7 +5,7 @@ import { updateCourse, deleteCourse } from '@/app/lib/actions';
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const id = url.pathname.split("/").pop(); // Extrae el ID desde la URL
+    const id = url.pathname.split("/").pop();
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -29,20 +29,18 @@ export async function GET(request: Request) {
   }
 }
 
-
-export async function PUT(
-  request: Request,
-  context: { params: { id: string } }
-) {
+export async function PUT(request: Request) {
   try {
-    const { id } = context.params;
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop(); // Extrae el ID desde la URL
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
     const body = await request.json();
+    const { title, course_code, description, credits, duration, difficulty_level, teacher_email } = body;
 
-    const {
-      title, course_code, description, credits, duration, difficulty_level, teacher_email
-    } = body;
-
-    // Validaciones de campos requeridos
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
       return NextResponse.json({ error: 'Course name is required and must be a non-empty string.' }, { status: 400 });
     }
@@ -65,7 +63,6 @@ export async function PUT(
       return NextResponse.json({ error: 'Teacher Email is required and must be a non-empty string.' }, { status: 400 });
     }
 
-    // Actualiza el curso
     const result = await updateCourse({ id, ...body });
 
     if (result?.errors) {
@@ -84,16 +81,21 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  context: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
-    const { id } = await context.params; 
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop(); // Extrae el ID desde la URL
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
     const result = await deleteCourse(id);
+
     if (!result) {
       return NextResponse.json({ error: 'Course not found or deletion failed.' }, { status: 404 });
     }
+
     return NextResponse.json({ message: 'Course deleted successfully' });
   } catch {
     return NextResponse.json({ error: 'Failed to delete course.' }, { status: 500 });
