@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { getTeachers } from '@/app/lib/data';
 import { updateTeacher, deleteTeacher } from '@/app/lib/actions';
 
-export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
     try {
-        const { id } = params;
+        const url = new URL(request.url);
+        const id = url.pathname.split("/").pop(); 
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        }
+
         const teachers = await getTeachers();
 
         function isTeacher(obj: unknown): obj is { id: string | number } {
@@ -20,29 +23,31 @@ export async function GET(
             return NextResponse.json({ error: 'Teacher not found.' }, { status: 404 });
         }
         return NextResponse.json(teacher);
-    } catch  {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch teacher.' }, { status: 500 });
     }
 }
 
-export async function PUT(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request) {
     try {
-        const { id } = params;
-        const body = await request.json();
+        const url = new URL(request.url);
+        const id = url.pathname.split("/").pop(); 
 
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        }
+
+        const body = await request.json();
         const {
             firstname,
             lastname,
             email,
             subject,
-            dateofbirth = null,
-            address = null,
-            phonenumber = null,
-            hiredate = null,
-            notes = null,
+            dateofbirth,
+            address,
+            phonenumber,
+            hiredate ,
+            notes,
             avatarurl = null,
         } = body;
 
@@ -98,12 +103,14 @@ export async function PUT(
     }
 }
 
-export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
     try {
-        const { id } = params;
+        const url = new URL(request.url);
+        const id = url.pathname.split("/").pop(); 
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        }
 
         const result = await deleteTeacher(id);
 
