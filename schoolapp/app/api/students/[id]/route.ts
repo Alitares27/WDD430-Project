@@ -9,12 +9,18 @@ export async function GET(
   try {
     const { id } = params;
     const students = await getStudents();
-    const student = students.find((s: any) => String(s.id) === id);
+
+    function isStudent(obj: unknown): obj is { id: string | number } {
+      return typeof obj === 'object' && obj !== null && 'id' in obj;
+    }
+
+    const student = (students as unknown[]).find((s) => isStudent(s) && String(s.id) === id);
+
     if (!student) {
       return NextResponse.json({ error: 'Student not found.' }, { status: 404 });
     }
     return NextResponse.json(student);
-  } catch  {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch student.' }, { status: 500 });
   }
 }
@@ -100,12 +106,16 @@ export async function DELETE(
 
     const result = await deleteStudent(id);
 
-    if (typeof result === 'object' && result !== null && 'error' in result) {
-      return NextResponse.json({ error: (result as any).error }, { status: 400 });
+    function hasError(obj: unknown): obj is { error: string } {
+      return typeof obj === 'object' && obj !== null && 'error' in obj;
+    }
+
+    if (hasError(result)) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     return NextResponse.json({ message: 'Student deleted successfully' });
-  } catch  {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete student.' }, { status: 500 });
   }
 }

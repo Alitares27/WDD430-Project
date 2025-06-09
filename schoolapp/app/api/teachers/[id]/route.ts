@@ -9,7 +9,13 @@ export async function GET(
     try {
         const { id } = params;
         const teachers = await getTeachers();
-        const teacher = teachers.find((t: any) => String(t.id) === id);
+
+        function isTeacher(obj: unknown): obj is { id: string | number } {
+            return typeof obj === 'object' && obj !== null && 'id' in obj;
+        }
+
+        const teacher = (teachers as unknown[]).find((t) => isTeacher(t) && String(t.id) === id);
+
         if (!teacher) {
             return NextResponse.json({ error: 'Teacher not found.' }, { status: 404 });
         }
@@ -78,8 +84,12 @@ export async function PUT(
 
         const result = await updateTeacher({ id, ...body });
 
-        if (result?.error) {
-            return NextResponse.json({ error: result.error }, { status: 400 });
+        function hasErrors(obj: unknown): obj is { errors: Record<string, string[]>; message: string } {
+            return typeof obj === 'object' && obj !== null && 'errors' in obj && 'message' in obj;
+        }
+
+        if (hasErrors(result)) {
+            return NextResponse.json({ error: result.message, errors: result.errors }, { status: 400 });
         }
 
         return NextResponse.json({ message: 'Teacher updated successfully', teacher: result });
@@ -97,8 +107,12 @@ export async function DELETE(
 
         const result = await deleteTeacher(id);
 
-        if (typeof result === 'object' && result !== null && 'error' in result) {
-            return NextResponse.json({ error: (result as any).error }, { status: 400 });
+        function hasError(obj: unknown): obj is { error: string } {
+            return typeof obj === 'object' && obj !== null && 'error' in obj;
+        }
+
+        if (hasError(result)) {
+            return NextResponse.json({ error: result.error }, { status: 400 });
         }
 
         return NextResponse.json({ message: 'Teacher deleted successfully' });

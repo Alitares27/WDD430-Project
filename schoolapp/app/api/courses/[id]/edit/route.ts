@@ -11,7 +11,6 @@ export async function PUT(
     const { id } = params;
     const body = await request.json();
 
-    // Validaciones de campos requeridos
     if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
       return NextResponse.json({ error: 'Course name is required and must be a non-empty string.' }, { status: 400 });
     }
@@ -35,13 +34,25 @@ export async function PUT(
     }
 
     const rows = await getCourses();
-    const courses: Course[] = rows.map((row: any) => ({
+
+    function isCourseRow(row: unknown): row is Course {
+      return typeof row === 'object' && row !== null &&
+        'id' in row &&
+        'title' in row &&
+        'course_code' in row &&
+        'description' in row &&
+        'credits' in row &&
+        'duration' in row &&
+        'difficulty_level' in row &&
+        'teacher_email' in row;
+    }
+
+    const courses: Course[] = (rows as unknown[]).filter(isCourseRow).map((row) => ({
       id: row.id,
       title: row.title,
       course_code: row.course_code,
       description: row.description,
       credits: row.credits,
-      department: row.department,
       duration: row.duration,
       difficulty_level: row.difficulty_level,
       teacher_email: row.teacher_email,

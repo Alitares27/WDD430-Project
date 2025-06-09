@@ -39,7 +39,20 @@ export type StudentState = {
   message?: string | null;
 };
 
-export async function createStudent(jsonData: any): Promise<StudentState> {
+export async function createStudent(jsonData: unknown): Promise<StudentState> {
+  function isStudentInput(obj: unknown): obj is Record<string, unknown> {
+    return typeof obj === 'object' && obj !== null;
+  }
+
+  if (!isStudentInput(jsonData)) {
+    return {
+      errors: {
+        firstname: ['Invalid input data.'],
+      },
+      message: 'Invalid input data. Could not create student.',
+    };
+  }
+
   const validatedFields = CreateStudent.safeParse({
     firstname: jsonData.firstname ?? null,
     lastname: jsonData.lastname ?? null,
@@ -191,8 +204,20 @@ export type TeacherState = {
   message?: string | null;
 };
 
-export async function createTeacher(jsonData: any): Promise<TeacherState> {
-  console.log('Received data:', jsonData);
+export async function createTeacher(jsonData: unknown): Promise<TeacherState> {
+  function isTeacherInput(obj: unknown): obj is Record<string, unknown> {
+    return typeof obj === 'object' && obj !== null;
+  }
+
+  if (!isTeacherInput(jsonData)) {
+    return {
+      errors: {
+        firstname: ['Invalid input data.'],
+      },
+      message: 'Invalid input data. Could not create teacher.',
+    };
+  }
+
   const validation = CreateTeacher.safeParse({
     firstname: jsonData.firstname,
     lastname: jsonData.lastname,
@@ -230,7 +255,6 @@ export async function createTeacher(jsonData: any): Promise<TeacherState> {
   } catch {
     return {
       message: 'Database error: Could not create teacher.',
-
     };
   }
 }
@@ -333,7 +357,21 @@ export type CourseState = {
   message?: string | null;
 };          
 
-export async function createCourse(jsonData: any): Promise<CourseState> {
+export async function createCourse(jsonData: unknown): Promise<CourseState> {
+  // Type guard to ensure jsonData is an object
+  function isCourseInput(obj: unknown): obj is Record<string, unknown> {
+    return typeof obj === 'object' && obj !== null;
+  }
+
+  if (!isCourseInput(jsonData)) {
+    return {
+      errors: {
+        title: ['Invalid input data.'],
+      },
+      message: 'Invalid input data. Could not create course.',
+    };
+  }
+
   const validation = CreateCourse.safeParse({
     title: jsonData.title,
     course_code: jsonData.course_code,

@@ -7,9 +7,15 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params; 
+    const { id } = await context.params;
     const courses = await getCourses();
-    const course = courses.find((s: any) => String(s.id) === id);
+
+    function isCourse(obj: unknown): obj is { id: string | number } {
+      return typeof obj === 'object' && obj !== null && 'id' in obj;
+    }
+
+    const course = (courses as unknown[]).find((s) => isCourse(s) && String(s.id) === id);
+
     if (!course) {
       return NextResponse.json({ error: 'Course not found.' }, { status: 404 });
     }
@@ -17,7 +23,7 @@ export async function GET(
   } catch {
     return NextResponse.json({ error: 'Failed to fetch course.' }, { status: 500 });
   }
-}   
+}
 
 export async function PUT(
   request: Request,
