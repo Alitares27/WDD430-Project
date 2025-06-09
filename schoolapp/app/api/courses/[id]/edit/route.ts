@@ -3,12 +3,15 @@ import { getCourses } from '@/app/lib/data';
 import { updateCourse } from '@/app/lib/actions';
 import type { Course } from '@/app/lib/definitions';
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request) {
   try {
-    const { id } = params;
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop(); 
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
     const body = await request.json();
 
     if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
@@ -76,7 +79,7 @@ export async function PUT(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return NextResponse.json({ error: 'Failed to update course.' }, { status: 500 });
   }
 }
