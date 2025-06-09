@@ -41,7 +41,7 @@ export default function TeachersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm(`Are you sure you want to delete the teacher with ID: ${id}? This action is irreversible.`)) {
+    if (window.confirm(`Are you sure you want to delete the teacher?.`)) {
       try {
         await fetch(`/api/teachers/${id}`, { method: 'DELETE' });
         setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.id !== id));

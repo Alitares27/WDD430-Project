@@ -56,7 +56,7 @@ export default function Page() {
   };
 
   const handleDelete = async (id: string) => {
-  if (window.confirm(`Are you sure you want to delete student ${id}?`)) {
+  if (window.confirm(`Are you sure you want to delete student?`)) {
     try {
       const res = await fetch(`/api/students/${id}`, {
         method: 'DELETE',

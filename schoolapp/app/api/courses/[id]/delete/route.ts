@@ -1,12 +1,9 @@
 import { deleteCourse } from "@/app/lib/actions";
 import { NextResponse } from "next/server";
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, context: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = context.params; 
 
     const result = await deleteCourse(id);
 
