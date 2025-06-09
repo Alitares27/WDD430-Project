@@ -1,3 +1,3 @@
 export default function Page() {
-  return <p>Attendance Page</p>;
+  return <p>Enrollments Page</p>;
 }

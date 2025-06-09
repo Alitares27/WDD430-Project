@@ -5,7 +5,7 @@ import {
     HomeIcon,
     DocumentDuplicateIcon,
     BookOpenIcon,
-    CalendarDaysIcon,
+    PencilSquareIcon ,
     UserIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ const links = [
     { name: 'Courses', href: '/dashboard/Courses', icon: BookOpenIcon  },
     { name: 'Teachers', href: '/dashboard/Teachers', icon: UserIcon },
     { name: 'Grades', href: '/dashboard/Grades', icon: DocumentDuplicateIcon },
-    { name: 'Attendance', href: '/dashboard/Attendance', icon: CalendarDaysIcon  },
+    { name: 'Enrollments', href: '/dashboard/Enrollments', icon: PencilSquareIcon   },
 ];
 
 export default function NavLinks() {
