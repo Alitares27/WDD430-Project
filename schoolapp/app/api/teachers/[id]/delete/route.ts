@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function DELETE(request: Request) {
     try {
         const url = new URL(request.url);
-        const id = url.pathname.split("/").pop(); // Extrae el ID desde la URL
+        const id = url.pathname.split("/").pop(); 
 
         if (!id) {
             return NextResponse.json({ error: 'ID is required' }, { status: 400 });
