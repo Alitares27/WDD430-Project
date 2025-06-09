@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Input from '@/app/ui/Input';
 import Button from '@/app/ui/button';
 import { useRouter } from 'next/navigation';
-import { createCourse } from '@/app/lib/actions';
 
 export default function AddCoursePage() {
   const router = useRouter();

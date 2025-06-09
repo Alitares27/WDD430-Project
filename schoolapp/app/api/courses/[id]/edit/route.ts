@@ -76,6 +76,7 @@ export async function PUT(
 
     return NextResponse.json(result);
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: 'Failed to update course.' }, { status: 500 });
   }
 }

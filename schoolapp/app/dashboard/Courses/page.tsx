@@ -71,7 +71,8 @@ export default function Page() {
             const errorData = JSON.parse(text);
             errorMessage = errorData.error || errorMessage;
           }
-        } catch (e) {
+        } catch (error) {
+          console.error('Failed to parse error response:', error);
         }
         alert(`Failed to delete course: ${errorMessage}`);
       }
