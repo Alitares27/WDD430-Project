@@ -13,8 +13,6 @@ export default function AddNewUserPage() {
     const [first_name, setFirstName] = useState<string>('');
     const [last_name, setLastName] = useState<string>('');
     const [role, setRole] = useState<string>('');
-    const [is_active, setIsActive] = useState<boolean>(true);
-    const [is_email_confirmed, setIsEmailConfirmed] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [loading, setLoading] = useState(false);
 
@@ -30,8 +28,6 @@ export default function AddNewUserPage() {
             first_name,
             last_name,
             role,
-            is_active,
-            is_email_confirmed,
         };
 
         try {
@@ -97,42 +93,42 @@ export default function AddNewUserPage() {
                         error={errors.lastname}
                         required
                     />
-                
-
-                <Input
-                    id="email"
-                    label="Email Address"
-                    type="email"
-                    placeholder="jane.doe@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    error={errors.email}
-                    required
-                />
-
-                <Input
-                    id="password_hash"
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
-                    value={password_hash}
-                    onChange={(e) => setPasswordHash(e.target.value)}
-                    error={errors.password_hash}
-                    required
-                />
 
 
-                <Input
-                    id="role"
-                    label="Role"
-                    type="text"
-                    placeholder="e.g., Admin, Teacher, Student"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    error={errors.role}
-                    required
-                />
-</div>
+                    <Input
+                        id="email"
+                        label="Email Address"
+                        type="email"
+                        placeholder="jane.doe@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        error={errors.email}
+                        required
+                    />
+
+                    <Input
+                        id="password_hash"
+                        label="Password"
+                        type="password"
+                        placeholder="Enter password"
+                        value={password_hash}
+                        onChange={(e) => setPasswordHash(e.target.value)}
+                        error={errors.password_hash}
+                        required
+                    />
+
+
+                    <Input
+                        id="role"
+                        label="Role"
+                        type="text"
+                        placeholder="e.g., Admin, Teacher, Student"
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        error={errors.role}
+                        required
+                    />
+                </div>
                 <div className="flex justify-end gap-4 mt-8">
                     <Button
                         type="button"

@@ -7,9 +7,14 @@ import Button from './button';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-async function authenticate(prevState: any, formData: FormData): Promise<string | undefined> {
+async function authenticate(prevState: unknown, formData: FormData): Promise<string | undefined> {
   const email = formData.get('email');
   const password = formData.get('password');
+
+  if (typeof prevState !== 'object' || prevState === null) {
+    throw new Error('Invalid previous state');
+  }
+
   if (email === 'admin@example.com' && password === 'password123') {
     return undefined;
   }
@@ -75,6 +80,14 @@ export default function LoginForm() {
         <Button className="mt-4 w-full" aria-disabled={isPending}>
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
+        <Button
+          type="button"
+          className="mt-2 w-full bg-gray-300 text-gray-700 hover:bg-gray-400"
+          onClick={() => window.location.href = '/'}
+        >
+          Cancel
+        </Button>
+
         <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"

@@ -5,7 +5,7 @@ import { roboto } from './ui/fonts';
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col p-6">
+    <main className="flex min-h-screen flex-col">
       <div className="flex h-20 shrink-0 items-end rounded-lg bg-cyan-600 p-4 md:h-52">
         <AcmeLogo />
       </div>
