@@ -7,16 +7,12 @@ import Button from './button';
 import { useActionState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-// You need to implement or import this function according to your authentication logic
 async function authenticate(prevState: any, formData: FormData): Promise<string | undefined> {
-  // Example: Replace with your actual authentication logic
   const email = formData.get('email');
   const password = formData.get('password');
   if (email === 'admin@example.com' && password === 'password123') {
-    // No error message, authentication successful
     return undefined;
   }
-  // Return error message if authentication fails
   return 'Invalid email or password';
 }
 
