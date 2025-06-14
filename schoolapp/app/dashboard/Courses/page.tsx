@@ -39,8 +39,7 @@ export default function Page() {
 
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.course_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchTerm.toLowerCase())
+    course.course_code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleViewDetails = (id: string) => {

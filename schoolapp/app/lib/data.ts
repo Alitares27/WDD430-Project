@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { Student, Teacher, Course } from "./definitions";
+import { Student, Teacher, Course, Users } from "./definitions";
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function getStudents() {
@@ -48,7 +48,7 @@ export async function getCourses() {
 
 export async function getUsers() {
   try {
-    const users = await sql`
+    const users = await sql<Users[]>`
       SELECT *
       FROM users
       ORDER BY first_name ASC
@@ -103,5 +103,34 @@ export async function getGrades() {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all grades.');
+  }
+}
+
+export async function getEnrollments() {
+  try {
+    const enrollments = await sql`
+       SELECT
+          s.first_name AS student_first_name,
+          s.last_name AS student_last_name,
+          e.completion_status,
+          c.title AS course_title,
+          c.credits AS course_credits,
+          t.firstName AS teacher_first_name,
+          t.lastName AS teacher_last_name,
+           e.enrollment_date
+      FROM
+          enrollments AS e
+      JOIN
+          users AS s ON e.student_id = s.user_id
+      JOIN
+          courses AS c ON e.course_id = c.id
+      JOIN
+          teachers AS t ON e.teacher_id = t.id;
+    `;
+
+    return enrollments;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all enrollments.');
   }
 }

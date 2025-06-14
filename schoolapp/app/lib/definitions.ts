@@ -39,14 +39,14 @@ export type Course = {
 
 };
 
-export type users = {
+export type Users = {
     user_id: string;
     username: string;
     email: string;
     password_hash: string;
     first_name: string;
     last_name: string;
-    role: 'student' | 'teacher' | 'admin';
+    role: string;
     is_active: boolean;
     is_email_confirmed: boolean;
     last_login_at?: Date | null;

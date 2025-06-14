@@ -23,6 +23,7 @@ const links = [
     { name: 'Teachers', href: '/dashboard/Teachers', icon: UserIcon },
     { name: 'Grades', href: '/dashboard/Grades', icon: DocumentDuplicateIcon },
     { name: 'Enrollments', href: '/dashboard/Enrollments', icon: PencilSquareIcon   },
+    { name: 'Users', href: '/dashboard/Users', icon: UserIcon },
 ];
 
 export default function NavLinks() {
