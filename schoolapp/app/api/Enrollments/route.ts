@@ -25,7 +25,7 @@ interface Enrollment {
   teacher_subject: string;
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

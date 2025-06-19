@@ -24,7 +24,7 @@ export default function ProfilePage() {
         }
         const data = await res.json();
         setStudent(data);
-      } catch (err) {
+      } catch {
         setError('Error loading profile.');
       } finally {
         setLoading(false);

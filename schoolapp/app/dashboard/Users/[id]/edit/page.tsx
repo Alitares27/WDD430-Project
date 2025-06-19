@@ -25,13 +25,12 @@ export default function UserEditPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); 
-  const [role, setRole] = useState('student'); 
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('student');
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     const fetchSessionAndUser = async () => {
@@ -76,7 +75,7 @@ export default function UserEditPage() {
     setError(null);
 
     try {
-      const body: any = {
+      const body: Partial<User> & { password?: string } = {
         first_name: firstName,
         last_name: lastName,
         email,
@@ -160,8 +159,6 @@ export default function UserEditPage() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
         />
-
-        
 
         {sessionUser?.role === 'admin' && (
           <div>

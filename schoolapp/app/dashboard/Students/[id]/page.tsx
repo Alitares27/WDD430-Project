@@ -24,7 +24,7 @@ interface Student {
 export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession(); // Eliminado el `status`
   const studentIdFromParams = params.id as string | undefined;
 
   const [student, setStudent] = useState<Student | null>(null);
@@ -63,12 +63,7 @@ export default function StudentDetailPage() {
         }
 
         const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setStudent(data[0]);
-        } else {
-          setStudent(data);
-        }
+        setStudent(Array.isArray(data) ? data[0] : data);
       } catch (err) {
         console.error('Error fetching student details:', err);
         setError('Error loading student details. Please try again.');
@@ -166,7 +161,7 @@ export default function StudentDetailPage() {
         )}
       </div>
 
-      {canEdit && (
+      {canEdit ? (
         <div className="flex justify-between md:justify-end gap-4 mt-6">
           <Button variant="secondary" onClick={() => router.back()}>
             Go Back
@@ -194,9 +189,7 @@ export default function StudentDetailPage() {
             Delete
           </Button>
         </div>
-      )}
-
-      {!canEdit && (
+      ) : (
         <div className="flex justify-start mt-6">
           <Button variant="secondary" onClick={() => router.back()}>
             Go Back

@@ -42,7 +42,7 @@ export default function UsersPage() {
           setSessionUser(userData);
           setUsers([]);
         }
-      } catch (error) {
+      } catch {
         setUsers([]);
         setSessionUser(null);
       } finally {

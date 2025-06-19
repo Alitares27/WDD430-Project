@@ -14,7 +14,6 @@ export default function TeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export default function TeachersPage() {
 
       setUserRole(session.user?.role ?? null);
       setUserId(session.user?.id ? session.user.id.toString() : null);
-      setUserEmail(session.user?.email ?? null);
 
       try {
         const res = await fetch('/api/teachers');

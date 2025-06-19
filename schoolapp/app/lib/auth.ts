@@ -15,6 +15,6 @@ export async function getUserFromDB(email: string, password: string): Promise<Om
   const isValid = await bcrypt.compare(password, user.password_hash);
   if (!isValid) return null;
 
-  const { password_hash, ...userWithoutPassword } = user;
+  const { password_hash: _password_hash, ...userWithoutPassword } = user;
   return userWithoutPassword;
 }

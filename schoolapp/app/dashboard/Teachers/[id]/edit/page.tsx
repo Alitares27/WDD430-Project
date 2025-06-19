@@ -40,7 +40,6 @@ export default function EditTeacherPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSessionAndData = async () => {
@@ -54,7 +53,6 @@ export default function EditTeacherPage() {
       }
 
       setUserRole(session.user?.role ?? null);
-      setUserId(session.user?.id ?? null);
 
       if (session.user?.role === 'teacher' && session.user.id !== teacherId) {
         setFetchError('No tienes permiso para editar este perfil.');
