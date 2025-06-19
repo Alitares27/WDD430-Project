@@ -3,7 +3,6 @@ import postgres from "postgres";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
 const StudentFormSchema = z.object({

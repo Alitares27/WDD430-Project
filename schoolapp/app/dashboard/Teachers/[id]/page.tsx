@@ -1,9 +1,10 @@
-'use client'; 
+'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation'; 
-import Button from '@/app/ui/button'; 
-import Image from 'next/image'; 
+import { useParams, useRouter } from 'next/navigation';
+import Button from '@/app/ui/button';
+import Image from 'next/image';
+import { getSession } from 'next-auth/react';
 
 interface Teacher {
   id: string;
@@ -27,6 +28,7 @@ export default function TeacherDetailPage() {
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTeacherDetails = async () => {
@@ -34,10 +36,15 @@ export default function TeacherDetailPage() {
       setError(null);
 
       try {
-        const res = await fetch(`/api/teachers/${teacherId}`);
-        if (!res.ok) {
-          throw new Error('Teacher not found.');
+        const session = await getSession();
+        if (!session) {
+          router.push('/login');
+          return;
         }
+        setUserRole(session.user?.role ?? null);
+
+        const res = await fetch(`/api/teachers/${teacherId}`);
+        if (!res.ok) throw new Error('Teacher not found.');
         const data = await res.json();
         setTeacher(data);
       } catch (err: unknown) {
@@ -54,7 +61,7 @@ export default function TeacherDetailPage() {
     if (teacherId) {
       fetchTeacherDetails();
     }
-  }, [teacherId]);
+  }, [teacherId, router]);
 
   if (loading) {
     return (
@@ -91,7 +98,6 @@ export default function TeacherDetailPage() {
 
       <div className="bg-white rounded-lg shadow-md p-8 mb-6">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-          {}
           <div className="flex-shrink-0 w-32 h-32 rounded-full overflow-hidden border-4 border-cyan-500 shadow-md">
             {teacher.avatarurl ? (
               <Image
@@ -109,7 +115,6 @@ export default function TeacherDetailPage() {
             )}
           </div>
 
-          {}
           <div className="flex-grow text-center md:text-left">
             <h2 className="text-4xl font-bold text-gray-900 mb-2">{teacher.firstname} {teacher.lastname}</h2>
             <p className="text-xl font-bold text-cyan-900 mb-4">{teacher.subject}</p>
@@ -121,7 +126,6 @@ export default function TeacherDetailPage() {
           </div>
         </div>
 
-        {}
         {teacher.bio && (
           <div className="mt-8 pt-6 border-t border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-3">Biography / Notes</h3>
@@ -130,33 +134,35 @@ export default function TeacherDetailPage() {
         )}
       </div>
 
-      {}
       <div className="flex justify-between md:justify-end gap-4 mt-6">
         <Button variant="secondary" onClick={() => router.back()}>
           Go Back
         </Button>
-        <Button variant="primary" onClick={() => router.push(`/dashboard/Teachers/${teacher.id}/edit`)}>
-          Edit 
-        </Button>
-        <Button
-          variant="danger"
-          className="bg-red-600 hover:bg-red-700"
-          onClick={async () => {
-            if (confirm(`Are you sure you want to delete ${teacher.firstname}?`)) {
-              const res = await fetch(`/api/teachers/${teacher.id}`, { method: 'DELETE' });
-
-              if (res.ok) {
-          alert('Teacher deleted successfully.');
-          router.push('/dashboard/Teachers');
-              } else {
-          const errorData = await res.json();
-          alert(`Error: ${errorData.error}`);
-              }
-            }
-          }}
-        >
-          Delete
-        </Button>
+        {userRole === 'admin' && (
+          <>
+            <Button variant="primary" onClick={() => router.push(`/dashboard/Teachers/${teacher.id}/edit`)}>
+              Edit
+            </Button>
+            <Button
+              variant="danger"
+              className="bg-red-600 hover:bg-red-700"
+              onClick={async () => {
+                if (confirm(`Are you sure you want to delete ${teacher.firstname}?`)) {
+                  const res = await fetch(`/api/teachers/${teacher.id}`, { method: 'DELETE' });
+                  if (res.ok) {
+                    alert('Teacher deleted successfully.');
+                    router.push('/dashboard/Teachers');
+                  } else {
+                    const errorData = await res.json();
+                    alert(`Error: ${errorData.error}`);
+                  }
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

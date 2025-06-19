@@ -3,9 +3,8 @@
 import {
     UserGroupIcon,
     HomeIcon,
-    DocumentDuplicateIcon,
     BookOpenIcon,
-    PencilSquareIcon ,
+    PencilSquareIcon,
     UserIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -19,10 +18,9 @@ const links = [
         href: '/dashboard/Students',
         icon: UserGroupIcon,
     },
-    { name: 'Courses', href: '/dashboard/Courses', icon: BookOpenIcon  },
+    { name: 'Courses', href: '/dashboard/Courses', icon: BookOpenIcon },
     { name: 'Teachers', href: '/dashboard/Teachers', icon: UserIcon },
-    { name: 'Grades', href: '/dashboard/Grades', icon: DocumentDuplicateIcon },
-    { name: 'Enrollments', href: '/dashboard/Enrollments', icon: PencilSquareIcon   },
+    { name: 'Enrollments', href: '/dashboard/Enrollments', icon: PencilSquareIcon },
     { name: 'Users', href: '/dashboard/Users', icon: UserIcon },
 ];
 
@@ -37,7 +35,7 @@ export default function NavLinks() {
                         key={link.name}
                         href={link.href}
                         className={clsx(
-                            'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+                            'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-cyan-600 md:flex-none md:justify-start md:p-2 md:px-3',
                             {
                                 'bg-sky-50 text-cyan-600': pathname === link.href,
                             },

@@ -8,7 +8,6 @@ const QuickAccessSection: React.FC = () => {
   const accessItems = [
     { icon: UserPlusIcon, label: 'Add Student', href: '/dashboard/Students/Create' },
     { icon: UserGroupIcon, label: 'Add Teacher', href: '/dashboard/Teachers/Create' },
-    { icon: DocumentDuplicateIcon, label: 'View Grades', href: '/dashboard/Grades' },
     { icon: PencilSquareIcon , label: 'Enrollments', href: '/dashboard/Enrollments' },
     { icon: BookmarkSquareIcon, label: 'Courses', href: '/dashboard/Courses/' },
   ];

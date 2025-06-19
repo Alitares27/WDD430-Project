@@ -1,16 +1,16 @@
 export type Student = {
-    id: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    grade: string;
-    dateofbirth?: string | null;
-    address?: string | null;
-    phonenumber?: string | null;
-    enrollmentdate?: string | null;
-    parentscontact?: string | null;
-    notes?: string | null;
-    avatarurl?: string | null;
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  grade: string;
+  dateofbirth?: string | null;
+  address?: string | null;
+  phonenumber?: string | null;
+  enrollmentdate?: string | null;
+  parentscontact?: string | null;
+  notes?: string | null;
+  avatarurl?: string | null;
 };
 
 export type Teacher = {
@@ -36,7 +36,6 @@ export type Course = {
     duration: string;
     difficulty_level: string;
     teacher_email: string;
-
 };
 
 export type Users = {

@@ -1,29 +1,68 @@
-'use client'; 
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import Input from '@/app/ui/Input'; 
-import Button from '@/app/ui/button'; 
-import TeacherCard from '@/app/ui/teachers/TeacherCard'; 
-import { useRouter } from 'next/navigation'; 
+import Input from '@/app/ui/Input';
+import Button from '@/app/ui/button';
+import TeacherCard from '@/app/ui/teachers/TeacherCard';
+import { useRouter } from 'next/navigation';
 import { Teacher } from '@/app/lib/definitions';
+import { getSession } from 'next-auth/react';
 
 export default function TeachersPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchTeachers = async () => {
+    const fetchUserAndTeachers = async () => {
+      setLoading(true);
+
+      const session = await getSession();
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      console.log('Session:', session);
+
+      setUserRole(session.user?.role ?? null);
+      setUserId(session.user?.id ? session.user.id.toString() : null);
+      setUserEmail(session.user?.email ?? null);
+
       try {
         const res = await fetch('/api/teachers');
         if (!res.ok) throw new Error('Failed to fetch teachers');
         const data = await res.json();
-        setTeachers(data);
-      } catch {
+
+        console.log('Teachers fetched:', data);
+
+        if (session.user?.role === 'teacher') {
+          const ownTeacherById = data.find((t: Teacher) => t.id.toString() === session.user.id.toString());
+          const ownTeacherByEmail = data.find((t: Teacher) => t.email.toLowerCase() === session.user.email?.toLowerCase());
+
+          const ownTeacher = ownTeacherById || ownTeacherByEmail;
+
+          console.log('Own teacher by id:', ownTeacherById);
+          console.log('Own teacher by email:', ownTeacherByEmail);
+
+          setTeachers(ownTeacher ? [ownTeacher] : []);
+        } else {
+          setTeachers(data);
+        }
+      } catch (error) {
+        console.error(error);
         setTeachers([]);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchTeachers();
-  }, []);
+
+    fetchUserAndTeachers();
+  }, [router]);
 
   const filteredTeachers = teachers.filter(teacher =>
     teacher.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -37,14 +76,17 @@ export default function TeachersPage() {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/dashboard/Teachers/${id}/edit`);
+    if (userRole === 'admin' || (userRole === 'teacher' && id.toString() === userId)) {
+      router.push(`/dashboard/Teachers/${id}/edit`);
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm(`Are you sure you want to delete the teacher?.`)) {
+    if (userRole !== 'admin') return;
+    if (window.confirm(`Are you sure you want to delete the teacher?`)) {
       try {
         await fetch(`/api/teachers/${id}`, { method: 'DELETE' });
-        setTeachers(prevTeachers => prevTeachers.filter(teacher => teacher.id !== id));
+        setTeachers(prev => prev.filter(teacher => teacher.id !== id));
       } catch {
         alert('Failed to delete teacher.');
       }
@@ -52,29 +94,35 @@ export default function TeachersPage() {
   };
 
   const handleAddNewTeacher = () => {
-    router.push('/dashboard/Teachers/Create');
+    if (userRole === 'admin') {
+      router.push('/dashboard/Teachers/Create');
+    }
   };
+
+  if (loading) {
+    return <p className="text-center p-4">Loading...</p>;
+  }
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Teacher Management</h1>
 
-      {}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <Input
-          id="search-teachers"
-          type="text"
-          placeholder="Search by name, subject, or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full md:max-w-xs"
-        />
-        <Button onClick={handleAddNewTeacher} className="w-full md:w-auto">
-          Add Teacher
-        </Button>
-      </div>
+      {userRole === 'admin' && (
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+          <Input
+            id="search-teachers"
+            type="text"
+            placeholder="Search by name, subject, or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full md:max-w-xs"
+          />
+          <Button onClick={handleAddNewTeacher} className="w-full md:w-auto">
+            Add Teacher
+          </Button>
+        </div>
+      )}
 
-      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredTeachers.length > 0 ? (
           filteredTeachers.map(teacher => (
@@ -88,9 +136,13 @@ export default function TeachersPage() {
                 hireDate: teacher.hiredate,
                 avatarUrl: teacher.avatarurl,
               }}
-              onViewDetails={handleViewDetails}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onViewDetails={() => handleViewDetails(teacher.id)}
+              onEdit={
+                (userRole === 'admin' || (userRole === 'teacher' && teacher.id.toString() === userId))
+                  ? () => handleEdit(teacher.id)
+                  : undefined
+              }
+              onDelete={userRole === 'admin' ? () => handleDelete(teacher.id) : undefined}
             />
           ))
         ) : (

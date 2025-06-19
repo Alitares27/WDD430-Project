@@ -1,34 +1,34 @@
 import { NextResponse } from 'next/server';
 import { getStudents } from '@/app/lib/data';
 import { updateStudent, deleteStudent } from '@/app/lib/actions';
+import { getStudentsByTeacherId, getStudentById } from '@/app/lib/data';
 
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const id = url.pathname.split("/").pop(); 
+    const teacherId = url.searchParams.get('teacherId');
+    const studentId = url.searchParams.get('studentId');
 
-    if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    if (teacherId) {
+      const students = await getStudentsByTeacherId(teacherId);
+      return NextResponse.json(students);
+    }
+
+    if (studentId) {
+      const student = await getStudentById(studentId);
+      if (!student) {
+        return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+      }
+      return NextResponse.json([student]); 
     }
 
     const students = await getStudents();
-
-    function isStudent(obj: unknown): obj is { id: string | number } {
-      return typeof obj === 'object' && obj !== null && 'id' in obj;
-    }
-
-    const student = (students as unknown[]).find((s) => isStudent(s) && String(s.id) === id);
-
-    if (!student) {
-      return NextResponse.json({ error: 'Student not found.' }, { status: 404 });
-    }
-
-    return NextResponse.json(student);
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch student.' }, { status: 500 });
+    return NextResponse.json(students);
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    return NextResponse.json({ error: 'Failed to fetch students.' }, { status: 500 });
   }
 }
-
 export async function PUT(request: Request) {
   try {
     const url = new URL(request.url);

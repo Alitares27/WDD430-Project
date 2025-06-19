@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Button from '@/app/ui/button';
+import { useSession } from 'next-auth/react';
 
 interface Course {
   id: string;
@@ -19,6 +20,8 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const params = useParams();
   const courseId = params.id as string;
+  const { data: session, status } = useSession();
+
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +33,6 @@ export default function CourseDetailPage() {
 
       try {
         const res = await fetch(`/api/courses/${courseId}`);
-        console.log(courseId)
         if (!res.ok) {
           throw new Error('Course not found.');
         }
@@ -49,7 +51,7 @@ export default function CourseDetailPage() {
     }
   }, [courseId]);
 
-  if (loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="container mx-auto p-4 text-center text-gray-600">
         <h1 className="text-3xl font-bold mb-4">Course Details</h1>
@@ -78,6 +80,9 @@ export default function CourseDetailPage() {
     );
   }
 
+  
+  const isAdmin = session?.user?.role === 'admin';
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
@@ -89,30 +94,39 @@ export default function CourseDetailPage() {
       <p className="text-gray-700 mb-2"><strong>Teacher Email:</strong> {course.teacher_email}</p>
 
       <div className="flex justify-between md:justify-end gap-4 mt-6">
-        <Button variant='secondary' onClick={() => router.back()} className="mt-4">Go Back</Button>
-        <Button variant="primary" onClick={() => router.push(`/dashboard/Courses/${course.id}/edit`)}>
-          Edit
+        <Button variant='secondary' onClick={() => router.back()} className="mt-4">
+          Go Back
         </Button>
-        <Button
-          variant="danger"
-          onClick={async () => {
-            if (confirm(`Are you sure you want to delete ${course.title}?`)) {
-              const res = await fetch(`/api/courses/${course.id}`, { method: 'DELETE' });
 
-              if (res.ok) {
-                alert('Course deleted successfully.');
-                router.push('/dashboard/Courses');
-              } else {
-                const errorData = await res.json();
-                alert(`Error: ${errorData.error}`);
-              }
-            }
-          }}
-        >
-          Delete
-        </Button>
+        {isAdmin && (
+          <>
+            <Button
+              variant="primary"
+              onClick={() => router.push(`/dashboard/Courses/${course.id}/edit`)}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                if (confirm(`Are you sure you want to delete ${course.title}?`)) {
+                  const res = await fetch(`/api/courses/${course.id}`, { method: 'DELETE' });
+
+                  if (res.ok) {
+                    alert('Course deleted successfully.');
+                    router.push('/dashboard/Courses');
+                  } else {
+                    const errorData = await res.json();
+                    alert(`Error: ${errorData.error}`);
+                  }
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
 }
-

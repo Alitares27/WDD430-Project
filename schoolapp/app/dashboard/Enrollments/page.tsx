@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Input from '../../ui/Input';
 import Button from '@/app/ui/button';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface Enrollment {
   enrollment_id: string;
@@ -28,13 +29,23 @@ interface Enrollment {
 
 export default function EnrollmentsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    if (status !== 'authenticated') return;
+
     const fetchEnrollments = async () => {
       try {
-        const res = await fetch('/api/Enrollments');
+        let url = '/api/Enrollments';
+
+        if (session?.user?.role === 'student') {
+          url += `?studentId=${session.user.id}`;
+        }
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch Enrollments');
         const data = await res.json();
         setEnrollments(data);
@@ -43,8 +54,9 @@ export default function EnrollmentsPage() {
         setEnrollments([]);
       }
     };
+
     fetchEnrollments();
-  }, []);
+  }, [session, status]);
 
   const filteredEnrollments = enrollments.filter(enrollment =>
     enrollment.student_first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,23 +68,26 @@ export default function EnrollmentsPage() {
   const handleAddNewEnrollment = () => {
     router.push('/dashboard/Enrollments/Create');
   };
-  
+
+  if (status === 'loading') {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Enrollments</h1>
+      <h1 className="text-2xl font-bold mb-4">Enrollments Management</h1>
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <Input
-          id='search'
+          id="search"
           type="text"
           placeholder="Search enrollments..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-grow"
         />
-        <Button onClick={handleAddNewEnrollment}>New Enrollment</Button>
-
-        
+        {session?.user?.role === 'admin' && (
+          <Button onClick={handleAddNewEnrollment}>New Enrollment</Button>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -102,10 +117,11 @@ export default function EnrollmentsPage() {
                   {new Date(enrollment.enrollment_date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span className={`font-semibold ${enrollment.completion_status === 'Completed' ? 'text-green-600' :
+                  <span className={`font-semibold ${
+                    enrollment.completion_status === 'Completed' ? 'text-green-600' :
                     enrollment.completion_status === 'In Progress' ? 'text-cyan-600' :
-                      'text-cyan-600'
-                    }`}>
+                    'text-cyan-600'
+                  }`}>
                     {enrollment.completion_status}
                   </span>
                 </td>

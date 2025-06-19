@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Input from '@/app/ui/Input'; 
 import Button from '@/app/ui/button'; 
 import { useParams, useRouter } from 'next/navigation'; 
+import { getSession } from 'next-auth/react';
 
 interface Teacher {
   id: string;
@@ -38,17 +39,34 @@ export default function EditTeacherPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTeacherData = async () => {
+    const fetchSessionAndData = async () => {
       setLoading(true);
       setFetchError(null);
+
+      const session = await getSession();
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      setUserRole(session.user?.role ?? null);
+      setUserId(session.user?.id ?? null);
+
+      if (session.user?.role === 'teacher' && session.user.id !== teacherId) {
+        setFetchError('No tienes permiso para editar este perfil.');
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(`/api/teachers/${teacherId}`);
-        if (!res.ok) {
-          throw new Error('Teacher not found.');
-        }
+        if (!res.ok) throw new Error('Teacher not found.');
         const data: Teacher = await res.json();
+
         setFirstname(data.firstname || '');
         setLastname(data.lastname || '');
         setEmail(data.email || '');
@@ -60,20 +78,15 @@ export default function EditTeacherPage() {
         setBio(data.bio || '');
         setAvatarurl(data.avatarurl || '');
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          setFetchError(err.message);
-        } else {
-          setFetchError('Error loading teacher data for editing.');
-        }
+        if (err instanceof Error) setFetchError(err.message);
+        else setFetchError('Error loading teacher data.');
       } finally {
         setLoading(false);
       }
     };
 
-    if (teacherId) {
-      fetchTeacherData();
-    }
-  }, [teacherId]);
+    if (teacherId) fetchSessionAndData();
+  }, [teacherId, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,52 +95,47 @@ export default function EditTeacherPage() {
 
     if (!firstname.trim()) newFormErrors.firstname = 'First Name is required.';
     if (!lastname.trim()) newFormErrors.lastname = 'Last Name is required.';
-    if (!email.trim()) {
-      newFormErrors.email = 'Email is required.';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newFormErrors.email = 'Email address is invalid.';
-    }
+    if (!email.trim()) newFormErrors.email = 'Email is required.';
+    else if (!/\S+@\S+\.\S+/.test(email)) newFormErrors.email = 'Email address is invalid.';
     if (!subject.trim()) newFormErrors.subject = 'Subject is required.';
     if (!phonenumber.trim()) newFormErrors.phonenumber = 'Phone Number is required.';
 
     setFormErrors(newFormErrors);
 
-    if (Object.keys(newFormErrors).length === 0) {
-      const updatedTeacherData: Partial<Teacher> = {
-        firstname,
-        lastname,
-        email,
-        subject,
-        phonenumber,
-        address,
-        hiredate,
-        qualification,
-        bio,
-        avatarurl,
-      };
+    if (Object.keys(newFormErrors).length > 0) return;
 
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/teachers/${teacherId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedTeacherData),
-        });
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || 'Error updating teacher.');
-        }
-        
-        router.push(`/dashboard/Teachers/${teacherId}`);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setFetchError(err.message);
-        } else {
-          setFetchError('Error updating teacher.');
-        }
-      } finally {
-        setLoading(false);
+    const updatedTeacherData: Partial<Teacher> = {
+      firstname,
+      lastname,
+      email,
+      subject,
+      phonenumber,
+      address,
+      hiredate,
+      qualification,
+      bio,
+      avatarurl,
+    };
+
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/teachers/${teacherId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedTeacherData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Error updating teacher.');
       }
+
+      router.push(`/dashboard/Teachers/${teacherId}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) setFetchError(err.message);
+      else setFetchError('Error updating teacher.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -145,7 +153,9 @@ export default function EditTeacherPage() {
       <div className="container mx-auto p-4 text-center text-red-600">
         <h1 className="text-3xl font-bold mb-4">Error</h1>
         <p>{fetchError}</p>
-        <Button onClick={() => router.back()} className="mt-4">Go Back</Button>
+        <Button onClick={() => router.back()} className="mt-4">
+          Go Back
+        </Button>
       </div>
     );
   }
@@ -187,6 +197,7 @@ export default function EditTeacherPage() {
           onChange={(e) => setEmail(e.target.value)}
           error={formErrors.email}
           required
+          disabled={userRole === 'teacher'} 
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -199,6 +210,7 @@ export default function EditTeacherPage() {
             onChange={(e) => setSubject(e.target.value)}
             error={formErrors.subject}
             required
+            disabled={userRole === 'teacher'} 
           />
           <Input
             id="phonenumber"
@@ -230,6 +242,7 @@ export default function EditTeacherPage() {
             value={hiredate}
             onChange={(e) => setHiredate(e.target.value)}
             error={formErrors.hiredate}
+            disabled={userRole === 'teacher'} 
           />
           <Input
             id="qualification"
@@ -242,14 +255,13 @@ export default function EditTeacherPage() {
           />
         </div>
 
-        {}
         <div className="mb-4">
           <label htmlFor="bio" className="block text-gray-700 text-sm font-bold mb-2">
             Biography / Notes
           </label>
           <textarea
             id="bio"
-            rows={5} 
+            rows={5}
             className={`
               shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight
               focus:outline-none focus:shadow-outline resize-y
@@ -259,17 +271,11 @@ export default function EditTeacherPage() {
             value={bio}
             onChange={(e) => setBio(e.target.value)}
           ></textarea>
-          {formErrors.bio && (
-            <p className="text-red-500 text-xs italic mt-1">{formErrors.bio}</p>
-          )}
+          {formErrors.bio && <p className="text-red-500 text-xs italic mt-1">{formErrors.bio}</p>}
         </div>
 
         <div className="flex justify-end gap-4 mt-8">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.back()} 
-          >
+          <Button type="button" variant="secondary" onClick={() => router.back()}>
             Cancel
           </Button>
           <Button type="submit" variant="primary">

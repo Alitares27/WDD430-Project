@@ -1,106 +1,84 @@
 'use client';
 
-import { openSans } from '@/app/ui/fonts';
-import {AtSymbolIcon, KeyIcon, ExclamationCircleIcon,} from '@heroicons/react/24/outline';
-import { ArrowRightIcon } from '@heroicons/react/20/solid';
-import Button from './button';
-import { useActionState } from 'react';
-import { useSearchParams } from 'next/navigation';
-
-async function authenticate(prevState: unknown, formData: FormData): Promise<string | undefined> {
-  const email = formData.get('email');
-  const password = formData.get('password');
-
-  if (typeof prevState !== 'object' || prevState === null) {
-    throw new Error('Invalid previous state');
-  }
-
-  if (email === 'admin@example.com' && password === 'password123') {
-    return undefined;
-  }
-  return 'Invalid email or password';
-}
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Input from '@/app/ui/Input';
+import Button from '@/app/ui/button';
 
 export default function LoginForm() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  const [errorMessage, formAction, isPending] = useActionState(
-    authenticate,
-    undefined,
-  );
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      callbackUrl: "/dashboard",
+    });
+
+    setLoading(false);
+
+    if (result?.error) {
+      setError("Email or password incorrect");
+    } else if (result?.ok) {
+      router.push(result.url || "/dashboard");
+    } else {
+      setError("Unexpected error, try again");
+    }
+  };
 
   return (
-    <form action={formAction} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
-        <h1 className={`${openSans.className} mb-3 text-2xl`}>
-          Please log in to continue.
-        </h1>
-        <div className="w-full">
-          <div>
-            <label
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-              htmlFor="email"
-            >
-              Email
-            </label>
-            <div className="relative">
-              <input
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-                id="email"
-                type="email"
-                name="email"
-                placeholder="Enter your email address"
-                required
-              />
-              <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <label
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <input
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-500"
-                id="password"
-                type="password"
-                name="password"
-                placeholder="Enter password"
-                required
-                minLength={6}
-              />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-          </div>
-        </div>
-        <input type="hidden" name="redirectTo" value={callbackUrl} />
-        <Button className="mt-4 w-full" aria-disabled={isPending}>
-          Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
-        </Button>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto"
+    >
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        label="Email Address"
+        placeholder="you@example.com"
+        required
+      />
+      <Input
+        id="password"
+        name="password"
+        type="password"
+        label="Password"
+        placeholder="Enter your password"
+        required
+      />
+
+      <div className="flex justify-end gap-4 mt-6">
         <Button
           type="button"
-          className="mt-2 w-full bg-gray-300 text-gray-700 hover:bg-gray-400"
-          onClick={() => window.location.href = '/'}
+          variant="secondary"
+          onClick={() => {
+            if (window.confirm("Are you sure you want to cancel and leave this page?")) {
+              router.push("/");
+            }
+          }}
+          disabled={loading}
         >
           Cancel
         </Button>
-
-        <div
-          className="flex h-8 items-end space-x-1"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {errorMessage && (
-            <>
-              <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              <p className="text-sm text-red-500">{errorMessage}</p>
-            </>
-          )}
-        </div>
+        <Button type="submit" variant="primary" disabled={loading}>
+          {loading ? "Signing in..." : "Sign In"}
+        </Button>
       </div>
+
+      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
     </form>
   );
 }

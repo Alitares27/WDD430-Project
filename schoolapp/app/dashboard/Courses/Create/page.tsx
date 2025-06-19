@@ -146,7 +146,7 @@ export default function AddCoursePage() {
           <Button 
           type="submit" 
           disabled={saving} 
-          className="bg-blue-600 text-white hover:bg-cyan-900">
+          className="bg-cyan-600 text-white hover:bg-cyan-900">
             {saving ? 'Saving...' : 'Add Course'}
           </Button>
           
