@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { Student, Teacher, Course, Users } from "./definitions";
+import { Teacher, Course, Users } from "./definitions";
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 import { Pool } from 'pg';
 
