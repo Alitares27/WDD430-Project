@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getStudentById } from '@/app/lib/data';
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  context: { params: { id: string } | Promise<{ id: string }> }
+) {
   try {
+    const params = await context.params;
     const student = await getStudentById(params.id);
 
     if (!student) {
