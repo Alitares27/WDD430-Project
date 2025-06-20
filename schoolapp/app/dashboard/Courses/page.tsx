@@ -58,7 +58,7 @@ export default function Page() {
 
   const handleEdit = (id: string) => {
     if (!isAdmin) return;
-    router.push(`/dashboard/courses/${id}/edit`);
+    router.push(`/dashboard/Courses/${id}/edit`);
   };
 
   const handleDelete = async (id: string) => {
