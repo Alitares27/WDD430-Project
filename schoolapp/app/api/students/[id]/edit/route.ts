@@ -4,17 +4,18 @@ import type { Student } from '@/app/lib/definitions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-export async function PUT(request: Request) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const url = new URL(request.url);
-    const id = url.pathname.split('/').at(-2); 
+    const id = params.id;
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     }
 
     const body = await request.json();
-
     const { firstname, lastname, email, grade } = body;
 
     if (!firstname || !lastname || !email || !grade) {
