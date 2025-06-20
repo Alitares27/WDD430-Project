@@ -1,25 +1,25 @@
-import { deleteCourse } from "@/app/lib/actions";
-import { NextResponse } from "next/server";
+import { deleteStudent } from '@/app/lib/actions';
+import { NextResponse } from 'next/server';
 
 export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
-    const id = url.pathname.split("/").pop();
+    const id = url.pathname.split('/').pop();
 
     if (!id) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     }
 
-    const result = await deleteCourse(id);
+    const result = await deleteStudent(id);
 
-    if (result?.message === "Course not found.") {
+    if (result?.message === 'Student not found.') {
       return NextResponse.json({ error: result.message }, { status: 404 });
     }
 
     return NextResponse.json({ message: result.message });
   } catch {
     return NextResponse.json(
-      { error: "Failed to delete course." },
+      { error: 'Failed to delete student.' },
       { status: 500 }
     );
   }
