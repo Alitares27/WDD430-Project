@@ -3,10 +3,9 @@ import { getStudentById } from '@/app/lib/data';
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } | Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const params = await context.params;
     const student = await getStudentById(params.id);
 
     if (!student) {
