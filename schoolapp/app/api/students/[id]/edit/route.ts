@@ -1,44 +1,67 @@
 import { NextResponse } from 'next/server';
-import postgres from 'postgres';
 import type { Student } from '@/app/lib/definitions';
+import { updateStudent } from '@/app/lib/actions';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
-
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request) {
   try {
-    const id = params.id;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop();
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     }
 
     const body = await request.json();
-    const { firstname, lastname, email, grade } = body;
+    const {
+      firstname,
+      lastname,
+      email,
+      grade,
+      dateofbirth = null,
+      address = null,
+      phonenumber = null,
+      enrollmentdate = null,
+      parentscontact = null,
+      notes = null,
+      avatarurl = null,
+    } = body;
 
-    if (!firstname || !lastname || !email || !grade) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    if (!firstname || typeof firstname !== 'string' || firstname.trim() === '') {
+      return NextResponse.json({ error: 'First name is required and must be a non-empty string.' }, { status: 400 });
+    }
+    if (!lastname || typeof lastname !== 'string' || lastname.trim() === '') {
+      return NextResponse.json({ error: 'Last name is required and must be a non-empty string.' }, { status: 400 });
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
+      return NextResponse.json({ error: 'A valid email is required.' }, { status: 400 });
+    }
+    if (!grade || typeof grade !== 'string' || grade.trim() === '') {
+      return NextResponse.json({ error: 'Grade is required and must be a non-empty string.' }, { status: 400 });
+    }
+    for (const [fieldName, fieldValue] of Object.entries({
+      dateofbirth,
+      address,
+      phonenumber,
+      enrollmentdate,
+      parentscontact,
+      notes,
+      avatarurl,
+    })) {
+      if (fieldValue !== null && typeof fieldValue !== 'string') {
+        return NextResponse.json({ error: `${fieldName} must be a string or null.` }, { status: 400 });
+      }
     }
 
-    await sql`
-      UPDATE students 
-      SET firstname = ${firstname}, lastname = ${lastname}, email = ${email}, grade = ${grade}
-      WHERE id = ${id}
-    `;
+    const result: Student | { errors?: any; message?: string } = await updateStudent({ id, ...body });
 
-    const updated = await sql<Student[]>`
-      SELECT id, firstname, lastname, email, grade FROM students WHERE id = ${id}
-    `;
-
-    if (!updated.length) {
-      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+    if ('errors' in result) {
+      return NextResponse.json({ errors: result.errors, message: result.message }, { status: 400 });
     }
 
-    return NextResponse.json({ message: 'Student updated successfully', student: updated[0] }, { status: 200 });
+    return NextResponse.json({ message: 'Student updated successfully', student: result });
   } catch (error) {
     console.error('Error updating student:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
   }
 }

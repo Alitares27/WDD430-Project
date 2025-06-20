@@ -18,6 +18,7 @@ export async function DELETE(request: Request) {
 
     const url = new URL(request.url);
     const segments = url.pathname.split("/");
+    
     const studentId = segments.at(-2);
 
     if (!studentId) {
