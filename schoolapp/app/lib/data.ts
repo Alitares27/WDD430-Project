@@ -4,29 +4,24 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 import { Pool } from 'pg';
 
 export async function getStudents() {
-  try {
-    const students = await sql`
-      SELECT
-        id,
-        firstname,
-        lastname,
-        email,
-        grade,
-        dateofbirth,
-        address,
-        phonenumber,
-        avatarurl,
-        enrollmentdate,
-        parentscontact,
-        notes
-      FROM students
-      ORDER BY lastname, firstname
-    `;
-    return students;
-  } catch (error) {
-    console.error('Error en getStudents:', error);
-    throw error;
-  }
+  const students = await sql`
+    SELECT
+      id,
+      firstname,
+      lastname,
+      email,
+      grade,
+      dateofbirth,
+      address,
+      phonenumber,
+      avatarurl,
+      enrollmentdate,
+      parentscontact,
+      notes
+    FROM students
+    ORDER BY firstname, lastname
+  `;
+  return students;
 }
 
 export async function getStudentById(id: string) {
@@ -34,6 +29,17 @@ export async function getStudentById(id: string) {
     SELECT *
     FROM students
     WHERE id = ${id}
+  `;
+  return result[0] || null;
+}
+
+
+
+export async function getStudentByEmail(email: string) {
+  const result = await sql`
+    SELECT *
+    FROM students
+    WHERE email = ${email}
   `;
   return result[0] || null;
 }

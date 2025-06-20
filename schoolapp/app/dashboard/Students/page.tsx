@@ -32,7 +32,14 @@ export default function StudentsPage() {
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
-          setStudents(Array.isArray(data) ? data : [data]);
+
+          if (Array.isArray(data)) {
+            setStudents(data);
+          } else if (data && data.id) {
+            setStudents([data]);
+          } else {
+            setStudents([]);
+          }
         } else {
           setStudents([]);
         }
