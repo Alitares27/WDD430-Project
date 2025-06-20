@@ -18,14 +18,15 @@ export async function PUT(request: Request) {
       email,
       grade,
       dateofbirth = null,
-      address = null,
-      phonenumber = null,
-      enrollmentdate = null,
-      parentscontact = null,
+      address = '',
+      phonenumber = '',
+      enrollmentdate = '',
+      parentscontact = '',
       notes = null,
-      avatarurl = null,
+      avatarurl = null, // aunque avatarurl no está en updateStudent, lo podés ignorar aquí
     } = body;
 
+    // Validaciones simples (puedes mejorar según necesidad)
     if (!firstname || typeof firstname !== 'string' || firstname.trim() === '') {
       return NextResponse.json({ error: 'First name is required and must be a non-empty string.' }, { status: 400 });
     }
@@ -39,27 +40,29 @@ export async function PUT(request: Request) {
     if (!grade || typeof grade !== 'string' || grade.trim() === '') {
       return NextResponse.json({ error: 'Grade is required and must be a non-empty string.' }, { status: 400 });
     }
-    for (const [fieldName, fieldValue] of Object.entries({
+
+    // Armar objeto explícito para que coincida con el tipo que espera updateStudent
+    const studentToUpdate = {
+      id,
+      firstname,
+      lastname,
+      email,
+      grade,
       dateofbirth,
       address,
       phonenumber,
       enrollmentdate,
       parentscontact,
       notes,
-      avatarurl,
-    })) {
-      if (fieldValue !== null && typeof fieldValue !== 'string') {
-        return NextResponse.json({ error: `${fieldName} must be a string or null.` }, { status: 400 });
-      }
-    }
+    };
 
-    const result: Student | { errors?: any; message?: string } = await updateStudent({ id, ...body });
+    const result = await updateStudent(studentToUpdate);
 
     if ('errors' in result) {
       return NextResponse.json({ errors: result.errors, message: result.message }, { status: 400 });
     }
 
-    return NextResponse.json({ message: 'Student updated successfully', student: result });
+    return NextResponse.json({ message: 'Student updated successfully' });
   } catch (error) {
     console.error('Error updating student:', error);
     return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
