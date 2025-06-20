@@ -24,7 +24,7 @@ interface Student {
 export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session } = useSession(); // Eliminado el `status`
+  const { data: session } = useSession(); 
   const studentIdFromParams = params.id as string | undefined;
 
   const [student, setStudent] = useState<Student | null>(null);

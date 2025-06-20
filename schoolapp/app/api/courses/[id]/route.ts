@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getCourseById } from '@/app/lib/data';
-import { updateCourse, deleteCourse } from '@/app/lib/actions';
 
 function getIdFromRequest(request: Request): string | null {
   const url = new URL(request.url);
