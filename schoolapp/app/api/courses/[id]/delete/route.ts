@@ -4,7 +4,10 @@ import { NextResponse } from 'next/server';
 export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
-    const id = url.pathname.split('/').filter(Boolean).pop(); // evita trailing slashes
+    const segments = url.pathname.split('/');
+    const id = segments[segments.length - 2] === 'delete'
+      ? segments[segments.length - 3]
+      : segments.pop();
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -17,11 +20,8 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ message: result.message });
-  } catch (err) {
-    console.error('DELETE error:', err);
-    return NextResponse.json(
-      { error: 'Failed to delete student.' },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Failed to delete student:', error);
+    return NextResponse.json({ error: 'Failed to delete student.' }, { status: 500 });
   }
 }
