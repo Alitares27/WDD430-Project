@@ -1,15 +1,10 @@
 import { deleteCourse } from '@/app/lib/actions';
 import { NextResponse } from 'next/server';
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
-export async function DELETE(request: Request, { params }: Params) {
+export async function DELETE(request: Request) {
   try {
-    const { id } = params;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop();
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
