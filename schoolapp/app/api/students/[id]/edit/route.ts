@@ -4,9 +4,15 @@ import type { Student } from '@/app/lib/definitions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request) {
   try {
-    const studentId = params.id;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').at(-2); 
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
     const body = await request.json();
 
     const { firstname, lastname, email, grade } = body;
@@ -18,11 +24,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     await sql`
       UPDATE students 
       SET firstname = ${firstname}, lastname = ${lastname}, email = ${email}, grade = ${grade}
-      WHERE id = ${studentId}
+      WHERE id = ${id}
     `;
 
     const updated = await sql<Student[]>`
-      SELECT id, firstname, lastname, email, grade FROM students WHERE id = ${studentId}
+      SELECT id, firstname, lastname, email, grade FROM students WHERE id = ${id}
     `;
 
     if (!updated.length) {
