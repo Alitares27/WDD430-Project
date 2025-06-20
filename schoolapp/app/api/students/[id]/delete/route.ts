@@ -5,10 +5,7 @@ import { authOptions } from "@/app/lib/authOptions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -19,7 +16,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const studentId = params.id;
+    const url = new URL(request.url);
+    const segments = url.pathname.split("/");
+    const studentId = segments.at(-2);
+
+    if (!studentId) {
+      return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
 
     await sql`DELETE FROM students WHERE id = ${studentId}`;
 
