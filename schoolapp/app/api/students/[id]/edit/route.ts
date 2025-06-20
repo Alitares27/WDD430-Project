@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import type { Student } from '@/app/lib/definitions';
 import { updateStudent } from '@/app/lib/actions';
 
 export async function PUT(request: Request) {
@@ -23,10 +22,8 @@ export async function PUT(request: Request) {
       enrollmentdate = '',
       parentscontact = '',
       notes = null,
-      avatarurl = null, // aunque avatarurl no está en updateStudent, lo podés ignorar aquí
     } = body;
 
-    // Validaciones simples (puedes mejorar según necesidad)
     if (!firstname || typeof firstname !== 'string' || firstname.trim() === '') {
       return NextResponse.json({ error: 'First name is required and must be a non-empty string.' }, { status: 400 });
     }
@@ -41,7 +38,6 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Grade is required and must be a non-empty string.' }, { status: 400 });
     }
 
-    // Armar objeto explícito para que coincida con el tipo que espera updateStudent
     const studentToUpdate = {
       id,
       firstname,

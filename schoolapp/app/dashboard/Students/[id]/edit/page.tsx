@@ -16,7 +16,6 @@ export default function StudentEditPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Campos individuales para editar
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +38,6 @@ export default function StudentEditPage() {
         if (!res.ok) throw new Error('Failed to fetch student');
 
         const responseData = await res.json();
-        // Asegurarse que data sea un objeto Student y no un array
         const data: Student = Array.isArray(responseData) ? responseData[0] : responseData;
 
         setStudent(data);
