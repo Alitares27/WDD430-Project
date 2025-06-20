@@ -1,10 +1,9 @@
 import { deleteStudent } from '@/app/lib/actions';
 import { NextResponse } from 'next/server';
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const url = new URL(request.url);
-    const id = url.pathname.split('/').pop();
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
