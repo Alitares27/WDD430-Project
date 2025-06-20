@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
-    const id = url.pathname.split('/').pop();
+    const id = url.pathname.split('/').filter(Boolean).pop(); // evita trailing slashes
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -17,7 +17,8 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ message: result.message });
-  } catch {
+  } catch (err) {
+    console.error('DELETE error:', err);
     return NextResponse.json(
       { error: 'Failed to delete student.' },
       { status: 500 }
