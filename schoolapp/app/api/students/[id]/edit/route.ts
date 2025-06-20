@@ -1,37 +1,37 @@
 import { NextResponse } from 'next/server';
-import { getStudents } from '@/app/lib/data';
-import { updateStudent } from '@/app/lib/actions';
+import postgres from 'postgres';
 import type { Student } from '@/app/lib/definitions';
 
-export async function PUT(request: Request) {
-    try {
-        const url = new URL(request.url);
-        const id = url.pathname.split("/").pop();
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-        if (!id) {
-            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
-        }
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const studentId = params.id;
+    const body = await request.json();
 
-        const body = await request.json();
-        const students: Student[] = await getStudents();
-        const studentIndex = students.findIndex((s: Student) => String(s.id) === id);
+    const { firstname, lastname, email, grade } = body;
 
-        if (studentIndex === -1) {
-            return NextResponse.json({ error: 'Student not found.' }, { status: 404 });
-        }
-
-        const updatedStudent: Student = { ...students[studentIndex], ...body };
-
-        const safeUpdatedStudent = {
-            ...updatedStudent,
-            address: updatedStudent.address ?? "",
-            phonenumber: updatedStudent.phonenumber ?? "",
-            enrollmentdate: updatedStudent.enrollmentdate ?? "",
-            parentscontact: updatedStudent.parentscontact ?? "",
-        };
-        await updateStudent(safeUpdatedStudent);
-        return NextResponse.json(safeUpdatedStudent);
-    } catch {
-        return NextResponse.json({ error: 'Failed to update student.' }, { status: 500 });
+    if (!firstname || !lastname || !email || !grade) {
+      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
+
+    await sql`
+      UPDATE students 
+      SET firstname = ${firstname}, lastname = ${lastname}, email = ${email}, grade = ${grade}
+      WHERE id = ${studentId}
+    `;
+
+    const updated = await sql<Student[]>`
+      SELECT id, firstname, lastname, email, grade FROM students WHERE id = ${studentId}
+    `;
+
+    if (!updated.length) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Student updated successfully', student: updated[0] }, { status: 200 });
+  } catch (error) {
+    console.error('Error updating student:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
