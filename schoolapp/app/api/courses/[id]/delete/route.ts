@@ -1,4 +1,4 @@
-import { deleteCourse } from '@/app/lib/actions';
+import { deleteStudent } from '@/app/lib/actions';
 import { NextResponse } from 'next/server';
 
 export async function DELETE(request: Request) {
@@ -10,16 +10,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     }
 
-    const result = await deleteCourse(id);
+    const result = await deleteStudent(id);
 
-    if (result?.message === 'Course not found.') {
+    if (result?.message === 'Student not found.') {
       return NextResponse.json({ error: result.message }, { status: 404 });
     }
 
     return NextResponse.json({ message: result.message });
   } catch {
     return NextResponse.json(
-      { error: 'Failed to delete course.' },
+      { error: 'Failed to delete student.' },
       { status: 500 }
     );
   }
