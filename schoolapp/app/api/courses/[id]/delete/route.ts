@@ -1,12 +1,10 @@
 import { deleteCourse } from '@/app/lib/actions';
 import { NextResponse } from 'next/server';
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
-    const { id } = params;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop();
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 });
@@ -19,8 +17,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: result.message });
-  } catch (error) {
-    console.error('DELETE /courses/[id]/delete error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete course.' },
       { status: 500 }
