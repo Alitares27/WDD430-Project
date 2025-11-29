@@ -51,10 +51,6 @@ export async function PUT(request: Request) {
             updated_at,
         } = body;
 
-        if (!username || typeof username !== 'string' || username.trim().length === 0) {
-            return NextResponse.json({ error: 'Username is required and must be a non-empty string.' }, { status: 400 });
-        }
-
         if (!password_hash || typeof password_hash !== 'string' || password_hash.trim().length === 0) {
             return NextResponse.json({ error: 'Password hash is required and must be a non-empty string.' }, { status: 400 });
         }
